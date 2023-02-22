@@ -1,0 +1,3 @@
+DELAY: equ 1203H
+DELAY2: equ 1200H
+LOOP: equ 1205H

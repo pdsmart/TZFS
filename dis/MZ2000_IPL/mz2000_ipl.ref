@@ -1,0 +1,466 @@
+dZ80 2.1 Reference file from the disassembly of "mz2000_ipl.rom".
+
+Input Port Reference (22 entries)
+---------------------------------
+
+Input Port 000d8H. 6 references:
+--------------------------------
+
+  00415H: IN      A,(0D8H)
+  0043dH: IN      A,(0D8H)
+  00458H: IN      A,(0D8H)
+  004fcH: IN      A,(0D8H)
+  0051fH: IN      A,(0D8H)
+  00564H: IN      A,(0D8H)
+
+Input Port 000d9H. 1 references:
+--------------------------------
+
+  000a8H: IN      A,(0D9H)
+
+Input Port 000e1H. 5 references:
+--------------------------------
+
+  00162H: IN      A,(0E1H)
+  0016aH: IN      A,(0E1H)
+  001c2H: IN      A,(0E1H)
+  001caH: IN      A,(0E1H)
+  001e3H: IN      A,(0E1H)
+
+Input Port 000e2H. 2 references:
+--------------------------------
+
+  000eaH: IN      A,(0E2H)
+  00230H: IN      A,(0E2H)
+
+Input Port 000e8H. 3 references:
+--------------------------------
+
+  00072H: IN      A,(0E8H)
+  0008eH: IN      A,(0E8H)
+  005e9H: IN      A,(0E8H)
+
+Input Port 000eaH. 3 references:
+--------------------------------
+
+  00095H: IN      A,(0EAH)
+  001ddH: IN      A,(0EAH)
+  005f0H: IN      A,(0EAH)
+
+Input Port 000f9H. 2 references:
+--------------------------------
+
+  00620H: IN      A,(0F9H)
+  0062dH: IN      A,(0F9H)
+
+
+Output Port Reference (50 entries)
+----------------------------------
+
+Output Port 000d8H. 4 references:
+---------------------------------
+
+  0040dH: OUT     (0D8H),A
+  00435H: OUT     (0D8H),A
+  004f5H: OUT     (0D8H),A
+  0051aH: OUT     (0D8H),A
+
+Output Port 000d9H. 2 references:
+---------------------------------
+
+  000a3H: OUT     (0D9H),A
+  004e4H: OUT     (0D9H),A
+
+Output Port 000daH. 1 references:
+---------------------------------
+
+  004eaH: OUT     (0DAH),A
+
+Output Port 000dbH. 1 references:
+---------------------------------
+
+  004caH: OUT     (0DBH),A
+
+Output Port 000dcH. 4 references:
+---------------------------------
+
+  003cdH: OUT     (0DCH),A
+  003f6H: OUT     (0DCH),A
+  0041fH: OUT     (0DCH),A
+  0053eH: OUT     (0DCH),A
+
+Output Port 000ddH. 1 references:
+---------------------------------
+
+  004d5H: OUT     (0DDH),A
+
+Output Port 000e0H. 8 references:
+---------------------------------
+
+  00013H: OUT     (0E0H),A
+  0003eH: OUT     (0E0H),A
+  001f8H: OUT     (0E0H),A
+  001ffH: OUT     (0E0H),A
+  0021bH: OUT     (0E0H),A
+  00222H: OUT     (0E0H),A
+  00227H: OUT     (0E0H),A
+  0022eH: OUT     (0E0H),A
+
+Output Port 000e2H. 3 references:
+---------------------------------
+
+  0000cH: OUT     (0E2H),A
+  000eeH: OUT     (0E2H),A
+  00234H: OUT     (0E2H),A
+
+Output Port 000e3H. 4 references:
+---------------------------------
+
+  00004H: OUT     (0E3H),A
+  00008H: OUT     (0E3H),A
+  00204H: OUT     (0E3H),A
+  0020bH: OUT     (0E3H),A
+
+Output Port 000e8H. 9 references:
+---------------------------------
+
+  0002fH: OUT     (0E8H),A
+  00057H: OUT     (0E8H),A
+  00078H: OUT     (0E8H),A
+  00088H: OUT     (0E8H),A
+  00093H: OUT     (0E8H),A
+  00262H: OUT     (0E8H),A
+  0026fH: OUT     (0E8H),A
+  00286H: OUT     (0E8H),A
+  005eeH: OUT     (0E8H),A
+
+Output Port 000e9H. 1 references:
+---------------------------------
+
+  00017H: OUT     (0E9H),A
+
+Output Port 000ebH. 2 references:
+---------------------------------
+
+  0001bH: OUT     (0EBH),A
+  0001fH: OUT     (0EBH),A
+
+Output Port 000f4H. 1 references:
+---------------------------------
+
+  00024H: OUT     (0F4H),A
+
+Output Port 000f5H. 1 references:
+---------------------------------
+
+  0002bH: OUT     (0F5H),A
+
+Output Port 000f6H. 1 references:
+---------------------------------
+
+  00022H: OUT     (0F6H),A
+
+Output Port 000f7H. 4 references:
+---------------------------------
+
+  00027H: OUT     (0F7H),A
+  00042H: OUT     (0F7H),A
+  00049H: OUT     (0F7H),A
+  00050H: OUT     (0F7H),A
+
+Output Port 000f8H. 2 references:
+---------------------------------
+
+  00635H: OUT     (0F8H),A
+  0063bH: OUT     (0F8H),A
+
+Output Port 000f9H. 1 references:
+---------------------------------
+
+  0063eH: OUT     (0F9H),A
+
+
+Direct address Reference (47 entries)
+-------------------------------------
+
+Direct address 00000H. 4 references:
+------------------------------------
+
+  00129H: LD      HL,00000H
+  003d3H: LD      HL,00000H
+  00450H: LD      HL,00000H
+  0055cH: LD      HL,00000H
+
+Direct address 0000dH. 1 references:
+------------------------------------
+
+  005ffH: LD      DE,0000DH
+
+Direct address 00010H. 1 references:
+------------------------------------
+
+  00469H: LD      DE,00010H
+
+Direct address 00080H. 1 references:
+------------------------------------
+
+  000f2H: LD      BC,00080H
+
+Direct address 00082H. 1 references:
+------------------------------------
+
+  00606H: LD      DE,00082H
+
+Direct address 000e9H. 1 references:
+------------------------------------
+
+  00245H: LD      BC,000E9H
+
+Direct address 00100H. 1 references:
+------------------------------------
+
+  00373H: LD      HL,00100H
+
+Direct address 00289H. 1 references:
+------------------------------------
+
+  00257H: LD      HL,00289H
+
+Direct address 00297H. 1 references:
+------------------------------------
+
+  0020eH: LD      HL,00297H
+
+Direct address 002b3H. 1 references:
+------------------------------------
+
+  001d0H: LD      HL,002B3H
+
+Direct address 002c1H. 1 references:
+------------------------------------
+
+  00266H: LD      HL,002C1H
+
+Direct address 002ceH. 1 references:
+------------------------------------
+
+  003b4H: LD      HL,002CEH
+
+Direct address 002dbH. 1 references:
+------------------------------------
+
+  0058cH: LD      HL,002DBH
+
+Direct address 00307H. 1 references:
+------------------------------------
+
+  005b2H: LD      HL,00307H
+
+Direct address 00316H. 1 references:
+------------------------------------
+
+  00572H: LD      HL,00316H
+
+Direct address 00331H. 1 references:
+------------------------------------
+
+  005d3H: LD      HL,00331H
+
+Direct address 0034eH. 1 references:
+------------------------------------
+
+  000d9H: LD      HL,0034EH
+
+Direct address 0035dH. 1 references:
+------------------------------------
+
+  00382H: LD      DE,0035DH
+
+Direct address 0051fH. 1 references:
+------------------------------------
+
+  004edH: LD      HL,0051FH
+
+Direct address 0060fH. 1 references:
+------------------------------------
+
+  0024bH: LD      BC,0060FH
+
+Direct address 00620H. 1 references:
+------------------------------------
+
+  0061aH: LD      IX,00620H
+
+Direct address 0062dH. 1 references:
+------------------------------------
+
+  00627H: LD      IX,0062DH
+
+Direct address 00800H. 1 references:
+------------------------------------
+
+  00174H: LD      HL,00800H
+
+Direct address 01414H. 1 references:
+------------------------------------
+
+  00194H: LD      HL,01414H
+
+Direct address 01a2cH. 1 references:
+------------------------------------
+
+  0060dH: LD      DE,01A2CH
+
+Direct address 03c19H. 1 references:
+------------------------------------
+
+  003faH: LD      HL,03C19H
+
+Direct address 03e7fH. 1 references:
+------------------------------------
+
+  0007fH: LD      BC,03E7FH
+
+Direct address 08000H. 3 references:
+------------------------------------
+
+  00117H: LD      HL,08000H
+  0039eH: LD      IX,08000H
+  00617H: LD      HL,08000H
+
+Direct address 0c000H. 1 references:
+------------------------------------
+
+  0006eH: LD      HL,0C000H
+
+Direct address 0c001H. 1 references:
+------------------------------------
+
+  0007aH: LD      DE,0C001H
+
+Direct address 0cf00H. 3 references:
+------------------------------------
+
+  000f5H: LD      HL,0CF00H
+  00364H: LD      IX,0CF00H
+  0037fH: LD      HL,0CF00H
+
+Direct address 0cf01H. 1 references:
+------------------------------------
+
+  000baH: LD      HL,0CF01H
+
+Direct address 0cf07H. 1 references:
+------------------------------------
+
+  00394H: LD      HL,0CF07H
+
+Direct address 0cf12H. 1 references:
+------------------------------------
+
+  00113H: LD      BC,(0CF12H)
+
+Direct address 0d000H. 2 references:
+------------------------------------
+
+  00031H: LD      HL,0D000H
+  00272H: LD      HL,0D000H
+
+Direct address 0ffe0H. 3 references:
+------------------------------------
+
+  0000eH: LD      SP,0FFE0H
+  0036fH: LD      IY,0FFE0H
+  00584H: LD      SP,0FFE0H
+
+Direct address 0ffe7H. 1 references:
+------------------------------------
+
+  003e5H: LD      HL,0FFE7H
+
+
+Indirect address Reference (27 entries)
+---------------------------------------
+
+Indirect address 0cf00H. 1 references:
+--------------------------------------
+
+  000c4H: LD      A,(0CF00H)
+
+Indirect address 0cf14H. 1 references:
+--------------------------------------
+
+  003a2H: LD      HL,(0CF14H)
+
+Indirect address 0cf1eH. 2 references:
+--------------------------------------
+
+  00369H: LD      (0CF1EH),A
+  0046cH: LD      HL,(0CF1EH)
+
+Indirect address 0cf1fH. 1 references:
+--------------------------------------
+
+  0036cH: LD      (0CF1FH),A
+
+Indirect address 0ffe0H. 4 references:
+--------------------------------------
+
+  0012cH: LD      (0FFE0H),HL
+  0013fH: LD      HL,(0FFE0H)
+  0017fH: LD      HL,(0FFE0H)
+  00183H: LD      (0FFE0H),HL
+
+Indirect address 0ffe2H. 2 references:
+--------------------------------------
+
+  0019cH: LD      (0FFE2H),HL
+  0019fH: LD      HL,(0FFE2H)
+
+Indirect address 0ffe6H. 4 references:
+--------------------------------------
+
+  0005dH: LD      (0FFE6H),A
+  003c1H: LD      A,(0FFE6H)
+  00406H: LD      (0FFE6H),A
+  0042dH: LD      (0FFE6H),A
+
+Indirect address 0ffe7H. 1 references:
+--------------------------------------
+
+  00421H: LD      (0FFE7H),A
+
+Indirect address 0ffe8H. 1 references:
+--------------------------------------
+
+  00424H: LD      (0FFE8H),A
+
+Indirect address 0ffe9H. 1 references:
+--------------------------------------
+
+  00427H: LD      (0FFE9H),A
+
+Indirect address 0ffeaH. 1 references:
+--------------------------------------
+
+  0042aH: LD      (0FFEAH),A
+
+Indirect address 0ffebH. 3 references:
+--------------------------------------
+
+  004a8H: LD      (0FFEBH),A
+  00546H: LD      A,(0FFEBH)
+  0054aH: LD      (0FFEBH),A
+
+Indirect address 0ffecH. 5 references:
+--------------------------------------
+
+  0005aH: LD      (0FFECH),A
+  003c8H: LD      A,(0FFECH)
+  003e1H: LD      A,(0FFECH)
+  00480H: LD      A,(0FFECH)
+  005cdH: LD      (0FFECH),A
+
+
+End of reference file for "mz2000_ipl.rom"
+

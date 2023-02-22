@@ -1,0 +1,12 @@
+	ORG 1200H
+
+DELAY2:	LD	BC,62086
+DELAY:	LD	A,15H	; 7
+LOOP:	DEC	A	; 4
+	JR	NZ, LOOP ; 7 = 378
+	DEC     BC	; 6
+	LD      A,B	; 4
+	OR      C	; 4
+	JR      NZ,DELAY  ; 7 = 399
+	JP	00000H
+
