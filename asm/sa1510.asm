@@ -667,16 +667,16 @@ HOM0:   LD      HL,00000H
         INC     L
 
 HLHEX:  PUSH    DE
-        CALL    L041F
+        CALL    _2HEX
         JR      C,L041D                 
         LD      H,A
-        CALL    L041F
+        CALL    _2HEX
         JR      C,L041D                 
         LD      L,A
 L041D:  POP     DE
         RET     
 
-L041F:  PUSH    BC
+_2HEX:  PUSH    BC
         LD      A,(DE)
         INC     DE
         CALL    HEX

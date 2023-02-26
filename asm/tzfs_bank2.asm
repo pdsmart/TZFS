@@ -12,11 +12,12 @@
 ;-                  I/O processor in the K64F/ZPU.
 ;-
 ;- Credits:         
-;- Copyright:       (c) 2018-2020 Philip Smart <philip.smart@net2net.org>
+;- Copyright:       (c) 2018-2023 Philip Smart <philip.smart@net2net.org>
 ;-
 ;- History:         May 2020  - Branch taken from RFS v2.0 and adapted for the tranZPUter SW.
 ;-                  Dec 2020  - Updates to accommodate v1.3 of the tranZPUter SW-700 board where soft
 ;-                              CPU's now become possible.
+;-                  Feb 2023  - TZFS now running on FusionX. Small changes to ensure compatibility.
 ;-
 ;--------------------------------------------------------------------------------------------------------
 ;- This source file is free software: you can redistribute it and-or modify
@@ -141,36 +142,41 @@ PRTMSG:     LD      A,(DE)
 PRTMSGE:    POP     BC
             RET
 
-            ; A modified print string routine with full screen pause to print out the help screen text. The routine prints out true ascii
-            ; as opposed to Sharp modified ascii.
+            ; A modified print string routine with full screen pause to print out the help screen text or other page text. The routine prints out true ascii
+            ; as opposed to Sharp modified ascii. It can be called with a multi line string or many times with single string, pausing if rowcount gets to end of string.
             ; A string is NULL terminated.
 PRTSTR:     PUSH    AF
             PUSH    BC
             PUSH    DE
-            LD      A,0
-            LD      (TMPLINECNT),A
+            PUSH    HL
+            LD      HL,TMPCNT
+            OR      A
+            JR      NZ,PRTSTR1                                           ; Carry set skip row count init, used when calling multiple times.
+            LD      (HL),A
 PRTSTR1:    LD      A,(DE)
             CP      000H                                                 ; NULL terminates the string.
-            JR      Z,PRTSTRE
+            JR      Z,PRTSTR3
             CP      00DH                                                 ; As does CR.
             JR      Z,PRTSTR3
 PRTSTR2:    CALL    PRINTASCII
             INC     DE
-            JR      PRTSTR1                   
+            JR      PRTSTR1
+            ;
 PRTSTR3:    PUSH    AF
-            LD      A,(TMPLINECNT)
-            CP      23                                                   ; Check to see if a page of output has been displayed, if it has, pause.
-            JR      Z,PRTSTR5
-            INC     A
-PRTSTR4:    LD      (TMPLINECNT),A
-            POP     AF
-            JR      PRTSTR2
-PRTSTR5:    CALL    GETKY
+            LD      A,(HL)
+            CP      24                                                   ; Check to see if a page of output has been displayed, if it has, pause.
+            JR      C,PRTSTR5
+PRTSTR4:    CALL    GETKY
             CP      ' '
-            JR      NZ,PRTSTR5
+            JR      NZ,PRTSTR4
             XOR     A
-            JR      PRTSTR4
-PRTSTRE:    POP     DE
+            LD      (HL),A
+PRTSTR5:    POP     AF
+            INC     (HL)                                                 ; Increment row count, used in repeated calls not clearing rowcount to zero.
+            OR      A
+            JR      NZ, PRTSTR2
+            POP     HL
+            POP     DE
             POP     BC
             POP     AF
             RET     
@@ -409,9 +415,11 @@ FDCJMPL2:   JP       (IX)
             ;-------------------------------------------------------------------------------
             ;        0                                       + <- 39
             ;        -----------------------------------------
-MSGSON:     DB      "+ TZFS v1.6 ",                                                       NULL                     ; Version 1.0-> first split from RFS v2.0
+MSGSON:     DB      "+ TZFS v1.7 ",                                                       NULL                     ; Version 1.0-> first split from RFS v2.0
 MSGSONEND:  DB      " **",                                                          CR,   NULL                     ; Signon banner termination.
+            IF BUILD_FUSIONX = 0
 MSGSONT80:  DB      "(T80)",                                                              NULL                     ; T80 CPU detected.
+            ENDIF   ; BUILD_FUSIONX
 MSGNOTFND:  DB      "Not Found",                                                    CR,   NULL
 MSGBADCMD:  DB      "???",                                                          CR,   NULL
 MSGSDRERR:  DB      "SD Read error, Sec:",0FBH,                                           NULL
@@ -431,7 +439,6 @@ MSGBOOTDRV: DB      CR,   "Floppy boot drive ?",                                
 MSGLOADERR: DB      CR,   "Disk loading error",                                     CR,   NULL
 MSGIPLLOAD: DB      CR,   "Disk loading ",                                                NULL
 MSGDSKNOTMST:DB     CR,   "This is not a boot disk",                                CR,   NULL
-MSGINITM:   DB      "Init memory",                                                  CR,   NULL
 MSGREAD4HEX:DB      "Bad hex number",                                               CR,   NULL
 MSGT2SDERR: DB      "Copy from Tape to SD Failed",                                  CR,   NULL
 MSGSD2TERR: DB      "Copy from SD to Tape Failed",                                  CR,   NULL
@@ -442,6 +449,7 @@ MSGFAILBIOS:DB      "Failed to load alternate BIOS!",                           
 MSGFAILEXIT:DB      "TZFS exit failed, I/O proc error!",                            CR,   NULL
 MSGFREQERR: DB      "Error, failed to change frequency!",                           CR,   NULL
 MSGBADNUM:  DB      "Error, bad number supplied!",                                  CR,   NULL
+            IF BUILD_FUSIONX = 0
 MSGNOFPGA:  DB      "Error, no FPGA video module!",                                 CR,   NULL
 MSGT80ERR:  DB      "Error, failed to switch to T80 CPU!",                          CR,   NULL
 MSGZ80ERR:  DB      "Error, failed to switch to Z80 CPU!",                          CR,   NULL
@@ -449,6 +457,7 @@ MSGZPUERR:  DB      "Error, failed to switch to ZPU CPU!",                      
 MSGNOSOFTCPU:DB     "No soft cpu hardware!",                                        CR,   NULL
 MSGNOT80CPU:DB      "T80 not available!",                                           CR,   NULL
 MSGNOEMU:   DB      "No Sharp MZ Series Emu hardware!",                             CR,   NULL
+            ENDIF   ; BUILD_FUSIONX
 ;
 OKCHECK:    DB      ", CHECK: ",                                                    CR,   NULL
 OKMSG:      DB      " OK.",                                                         CR,   NULL
@@ -460,6 +469,8 @@ MSG_TIMERTST:DB     "8253 TIMER TEST",                                          
 MSG_TIMERVAL:DB     "READ VALUE 1: ",                                               CR,   NULL
 MSG_TIMERVAL2:DB    "READ VALUE 2: ",                                               CR,   NULL
 MSG_TIMERVAL3:DB    "READ DONE.",                                                   CR,   NULL
+MSGNOINSTR: DB      "Bad instruction.",                                             CR,   NULL
+MSGNOPARAM: DB      "Bad parameter.",                                               CR,   NULL
 
 
             ; The FDC controller uses it's busy/wait signal as a ROM address line input, this
@@ -489,58 +500,78 @@ SVCIOERR:   DB      "I/O Error, time out!",                                     
             ;-------------------------------------------------------------------------------
 
             ; Simple help screen to display commands.
-HELP:       ;CALL    NL
-            LD      DE, HELPSCR
+HELP:       LD      DE, HELPSCR
+            XOR     A                                                     ; Paging starts at 0.
             CALL    PRTSTR
             RET
 
             ; Help text. Use of lower case, due to Sharp's non standard character set, is not easy, you have to manually code each byte
             ; hence using upper case.
 HELPSCR:    ;       "--------- 40 column width -------------"
-            DB      "4        40 col mode.",                                00DH
-            DB      "8        80 col mode.",                                00DH
-           ;DB      "40A      select MZ-80A 40col Mode.",                   00DH
-           ;DB      "80A      select MZ-80A 80col Mode.",                   00DH
-           ;DB      "80B      select MZ-80B Mode.",                         00DH
-           ;DB      "700      select MZ-700 40col Mode.",                   00DH
-           ;DB      "7008     select MZ-700 80col Mode.",                   00DH
-            DB      "B        toggle keyboard bell.",                       00DH
-            DB      "BASIC    load BASIC SA-5510.",                         00DH
-            DB      "C[b]     clear memory $1200-$D000.",                   00DH
-            DB      "CD[d]    switch to SD directory [d].",                 00DH
-            DB      "CPM      load CPM.",                                   00DH
-            DB      "DXXXX[YYYY] dump mem XXXX to YYYY.",                   00DH
-            DB      "DIR[wc]  SD dir listing, wc=wildcard.",                00DH
-            DB      "ECfn     erase file, fn=No or Filename",               00DH
-            DB      "EX       exit TZFS, reset as original.",               00DH
-            DB      "Fx       boot fd drive x.",                            00DH
-            DB      "FREQn    set CPU to nKHz, 0 default.",                 00DH
-            DB      "H        this help screen.",                           00DH
-            DB      "JXXXX    jump to location XXXX.",                      00DH
-            DB      "LTfn[,M] load tape, fn=Filename",                      00DH
-            DB      "  M = HW Mode, K=80K,C=80C,1=1200",                    00DH
-            DB      "      A=80A,7=700,8=800,B=80B,2=2000",                 00DH
-            DB      "LCfn[,M] load from SD, fn=No or FileN",                00DH
-            DB      "         add NX for no exec, ie.LCNX.",                00DH
-            DB      "MXXXX    edit memory starting at XXXX.",               00DH
-            DB      "MZmc     activate hardware emulation.",                00DH
-            DB      "  mc =80K,80C,1200,80A,700,800,80B,2000",              00DH
-            DB      "P        test printer.",                               00DH
-            DB      "R        test dram memory.",                           00DH
-            DB      "SDDd     change to SD directory {d}.",                 00DH
-            DB      "SD2Tfn[,M] copy SD to tape.",                          00DH
-            DB      "STXXXXYYYYZZZZ[,M] save mem to tape.",                 00DH
-            DB      "SCXXXXYYYYZZZZ save mem to card.",                     00DH
-            DB      "  XXXX=start, YYYY=end, ZZZZ=exec",                    00DH
-            DB      "T        test timer.",                                 00DH
-            DB      "T2SD[B][,M] copy tape to SD, B=Bulk",                  00DH
-            DB      "T80      switch to soft T80 CPU.",                     00DH
-            DB      "V        verify tape save.",                           00DH
-            DB      "VBORDERn set vga border colour.",                      00DH
-            DB      "VMODEn   set video mode.",                             00DH
-            DB      "VGAn     set VGA mode.",                               00DH
-            DB      "Z80      switch to hard Z80 CPU.",                     00DH
-            DB      "ZPU      switch to ZPU Evo CPU / zOS.",                00DH
+            DB      "4        40 col mode",                                00DH
+            DB      "8        80 col mode",                                00DH
+           ;DB      "40A      select MZ-80A 40col Mode",                   00DH
+           ;DB      "80A      select MZ-80A 80col Mode",                   00DH
+           ;DB      "80B      select MZ-80B Mode",                         00DH
+           ;DB      "700      select MZ-700 40col Mode",                   00DH
+           ;DB      "7008     select MZ-700 80col Mode",                   00DH
+            DB      "ASMXXXX  assemble into dest XXXX",                    00DH
+            DB      "B        toggle keyboard bell",                       00DH
+            DB      "BASIC    load BASIC SA-5510",                         00DH
+            DB      "CD[d]    switch to SD directory [d]",                 00DH
+            DB      "CPXXXXYYYYZZZZ",                                      00DH
+            DB      "         copy XXXX to YYYY of size ZZZZ",             00DH
+            DB      "CPM      load CPM",                                   00DH
+            DB      "DXXXX[YYYY]",                                         00DH 
+            DB      "         dump mem XXXX to YYYY",                      00DH
+            DB      "DASMXXXX[YYYY]",                                      00DH
+            DB      "         disassemble XXXX to YYYY",                   00DH
+            DB      "DIR[wc]  SD dir listing, wc=wildcard",                00DH
+            DB      "ECfn     erase file, fn=No or Filename",              00DH
+            DB      "EX       exit TZFS, reset as original",               00DH
+            DB      "Fx       boot fd drive x",                            00DH
+            DB      "FILLXXXXYYYY[ZZ]",                                    00DH
+            DB      "         Fill memory from XXXX to YYYY",              00DH
+            DB      "FREQn    set CPU to nKHz, 0 default",                 00DH
+            DB      "H        this help screen",                           00DH
+            DB      "JXXXX    jump to location XXXX",                      00DH
+            DB      "LTfn[,M] load tape, fn=Filename",                     00DH
+            DB      "         M = HW Mode, K=80K,C=80C,",                  00DH
+            DB      "             1=1200,A=80A,7=700,8=800,",              00DH
+            DB      "             B=80B, 2=2000",                          00DH
+            DB      "LCfn[,M] load from SD, fn=No or FileN",               00DH
+            DB      "         add NX for no exec, ie.LCNX",                00DH
+            DB      "MXXXX    edit memory starting at XXXX",               00DH
+            IF BUILD_FUSIONX = 0
+            DB      "MZmc     activate hardware emulation",                00DH
+            DB      "         mc =80K,80C,1200,80A,700,800,",              00DH
+            DB      "             80B,2000",                               00DH
+            ENDIF   ; BUILD_FUSIONX
+            DB      "P        test printer",                               00DH
+            DB      "R        test dram memory",                           00DH
+            DB      "RIOXXXX  Read I/O port XXXX and print",               00DH
+           ;DB      "SDDd     change to SD directory {d}",                 00DH
+            DB      "SD2Tfn[,M] copy SD to tape",                          00DH
+            DB      "STXXXXYYYYZZZZ[,M]",                                  00DH
+            DB      "         save memory to tape",                        00DH
+            DB      "SCXXXXYYYYZZZZ",                                      00DH
+            DB      "         save mem to card, XXXX=start",               00DH
+            DB      "                 YYYY=end, ZZZZ=exec",                00DH
+            DB      "T        test timer",                                 00DH
+            DB      "T2SD[B][,M]",                                         00DH
+            DB      "         copy tape to SD, B=Bulk",                    00DH
+            IF BUILD_FUSIONX = 0
+            DB      "T80      switch to soft T80 CPU",                     00DH
+            ENDIF   ; BUILD_FUSIONX
+            DB      "V        verify tape save",                           00DH
+            DB      "WIOXXXXYY Write YY to I/O port XXXX",                 00DH
+            IF BUILD_FUSIONX = 0
+            DB      "VBORDERn set vga border colour",                      00DH
+            DB      "VMODEn   set video mode",                             00DH
+            DB      "VGAn     set VGA mode",                               00DH
+            DB      "Z80      switch to hard Z80 CPU",                     00DH
+            DB      "ZPU      switch to ZPU Evo CPU / zOS",                00DH
+            ENDIF   ; BUILD_FUSIONX
             ;       "--------- 40 column width -------------"
             DB                                                              000H
 

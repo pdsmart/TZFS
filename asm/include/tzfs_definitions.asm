@@ -10,10 +10,11 @@
 ;-                  I/O processor in the K64F/ZPU.
 ;-
 ;- Credits:         
-;- Copyright:       (c) 2019-21 Philip Smart <philip.smart@net2net.org>
+;- Copyright:       (c) 2018-2023 Philip Smart <philip.smart@net2net.org>
 ;-
 ;- History:         May 2020  - Branch taken from RFS v2.0 and adapted for the tranZPUter SW.
 ;-                  July 2020 - Updates to accommodate v2.1 of the tranZPUter board.
+;-                  Feb 2023  - TZFS now running on FusionX. Small changes to ensure compatibility.
 ;-
 ;--------------------------------------------------------------------------------------------------------
 ;- This source file is free software: you can redistribute it and-or modify
@@ -33,9 +34,10 @@
 ;-----------------------------------------------
 ; Features.
 ;-----------------------------------------------
-BUILD_MZ80A             EQU     0                                        ; Build for the standard Sharp MZ80A, no lower memory.
-BUILD_MZ700             EQU     1                                        ; Build for the Sharp MZ-700 base hardware.
+BUILD_MZ80A             EQU     1                                        ; Build for the standard Sharp MZ80A, no lower memory.
+BUILD_MZ700             EQU     0                                        ; Build for the Sharp MZ-700 base hardware.
 BUILD_MZ2000            EQU     0                                        ; Build for the Sharp MZ-2000 base hardware.
+BUILD_FUSIONX           EQU     1                                        ; Build for the set host using the FusionX board.
 
 ; Debugging
 ENADEBUG                EQU     0                                        ; Enable debugging logic, 1 = enable, 0 = disable

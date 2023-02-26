@@ -126,10 +126,10 @@ QWRD          EQU   CMT_WRDATA
             ; Declare the MZF header to bootstrap BASIC from tape/SD.
 BOOTATRB:   DB      01h                                                  ; Code Type, 01 = Machine Code.
 BOOTNAME:   IF BUILD_ORIG = 1
-              DB    "BASIC SA-5510   ", 0Dh                              ; Title/Name (17 bytes).
+              DB    "BASIC-SA-5510   ", 0Dh                              ; Title/Name (17 bytes).
             ENDIF
             IF BUILD_TZFS = 1
-              DB    "BASIC SA-5510-TZ", 0Dh                              ; Title/Name (17 bytes).
+              DB    "BASIC-SA-5510-TZ", 0Dh                              ; Title/Name (17 bytes).
             ENDIF
 BOOTSIZE:   DW      BASICEND - TAPECOPY                                  ; Size of program.
 BOOTDTADR:  DW      TAPECOPY                                             ; Load address of program.

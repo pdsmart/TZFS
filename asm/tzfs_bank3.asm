@@ -12,11 +12,12 @@
 ;-                  I/O processor in the K64F/ZPU.
 ;-
 ;- Credits:         
-;- Copyright:       (c) 2018-2020 Philip Smart <philip.smart@net2net.org>
+;- Copyright:       (c) 2018-2023 Philip Smart <philip.smart@net2net.org>
 ;-
 ;- History:         May 2020  - Branch taken from RFS v2.0 and adapted for the tranZPUter SW.
 ;-                  Jul 2021  - Updated to add configurable tape read/write for MZ80K,80B and 800 series
 ;-                              machines.
+;-                  Feb 2023  - TZFS now running on FusionX. Small changes to ensure compatibility.
 ;-
 ;--------------------------------------------------------------------------------------------------------
 ;- This source file is free software: you can redistribute it and-or modify
@@ -39,6 +40,7 @@
             ; TZFS BANK 3 - Utilities and additional commands.
             ;
             ;============================================================
+
             ORG     BANKRAMADDR
 
             ;-------------------------------------------------------------------------------
@@ -194,7 +196,6 @@ MCRX3:      LD      H,B                                                  ; memor
             LD      L,C
             JR      MCORX1
 
-
             ; Dump method when called interbank as HL cannot be passed.
             ;
             ; BC = Start
@@ -288,28 +289,6 @@ DUMP8:      CP      'X'
             JR      DUMP
 DUMP9:      LD      (DUMPADDR),HL                                        ; Store last address so we can just press D for next page,
             CALL    NL
-            RET
-
-
-            ; Cmd tool to clear memory.
-            ; Read cmd line for an init byte, if one not present, use 00H
-            ;
-INITMEMX:   CALL    _2HEX
-            JR      NC,INITMEMX1
-            LD      A,000H
-INITMEMX1:  PUSH    AF
-            LD      DE,MSGINITM
-            CALL    ?PRINTMSG
-            LD      HL,1200h
-            LD      BC,0D000h - 1200h
-            POP     DE
-CLEAR1:     LD      A,D
-            LD      (HL),A
-            INC     HL
-            DEC     BC
-            LD      A,B
-            OR      C
-            JP      NZ,CLEAR1
             RET
 
             ;-------------------------------------------------------------------------------
@@ -647,7 +626,11 @@ SLPT:       DB      01H                                                  ; TEXT 
             ;
             ; Example:
             ;          17 + 7 + ((4+10)*x) + 12 + 10 = 564 * 1/3546000 = 159uS + (7 + 13 * (1/3546000)) = 164.5uS
-CMTSETDLY:  LD      A,(HWMODEL)                                              ; Get the machine model we are conforming to.
+            ;          (66 + (14 * x)) / 3540000 = delay 
+            ;          MZ-700 - x = ((delay * 3540000) - 66) / 14
+            ;          MZ-80A - x = ((delay * 2000000) - 66) / 14
+CMTSETDLY:  IF BUILD_MZ700 > 0
+            LD      A,(HWMODEL)                                              ; Get the machine model we are conforming to.
             CP      5                                                        ; MZ-800 has its own timing.
             JR      Z,CMTSETDLY0
             CP      6                                                        ; MZ-80B uses 1800 baud settings
@@ -656,7 +639,7 @@ CMTSETDLY:  LD      A,(HWMODEL)                                              ; G
             JR      Z,CMTSETDLY1
             ;
             ; K Series
-            LD      A,86                                                     ; Remainder of the machines us a 1200 baud setting,
+            LD      A,86                                                     ; Remainder of the machines use a 1200 baud setting,
             LD      (CMTSAMPLECNT),A                                         ; 368uS sample point.
             LD      A,56                                                     ; 
             LD      (CMTDLY1CNTM),A                                          ; 240us 
@@ -690,6 +673,54 @@ CMTSETDLY1: LD      A,52                                                     ; 2
             LD      (CMTDLY2CNTM),A                                          ; 
             LD      A,80                                                     ;        + 334uS = 667uS
             LD      (CMTDLY2CNTS),A                                          ; 
+            ENDIF
+            ; The values below are for an MZ-80A running at 2MHz under the FusionX board.
+            ; If TZFS runs on more platforms then a table will be the best method forward.
+            IF BUILD_MZ80A > 0
+            LD      A,(HWMODEL)                                              ; Get the machine model we are conforming to.
+            CP      5                                                        ; MZ-800 has its own timing.
+            JR      Z,CMTSETDLY0
+            CP      6                                                        ; MZ-80B uses 1800 baud settings
+            JR      Z,CMTSETDLY1
+            CP      7                                                        ; MZ-2000 uses 1800 baud settings
+            JR      Z,CMTSETDLY1
+            ;
+            ; K Series
+            LD      A,47                                                     ; Remainder of the machines use a 1200 baud setting,
+            LD      (CMTSAMPLECNT),A                                         ; 368uS sample point.
+            LD      A,30                                                     ; 
+            LD      (CMTDLY1CNTM),A                                          ; 240us 
+            LD      A,33                                                     ; 
+            LD      (CMTDLY1CNTS),A                                          ;       + 264uS = 504uS
+            LD      A,62
+            LD      (CMTDLY2CNTM),A                                          ; 464uS 
+            LD      A,66
+            LD      (CMTDLY2CNTS),A                                          ;       + 494uS = 958uS
+            RET
+            ; MZ-800
+CMTSETDLY0: LD      A,49                                                     ; 379uS sample point
+            LD      (CMTSAMPLECNT),A
+            LD      A,30                                                     ; 240uS
+            LD      (CMTDLY1CNTM),A
+            LD      A,35                                                     ;       + 278uS = 518uS
+            LD      (CMTDLY1CNTS),A
+            LD      A,62                                                     ; 470uS
+            LD      (CMTDLY2CNTM),A                                          ; 
+            LD      A,66                                                     ;       + 494uS = 964uS
+            LD      (CMTDLY2CNTS),A                                          ; 
+            RET
+            ; B Series
+CMTSETDLY1: LD      A,32                                                     ; 255uS sample point.
+            LD      (CMTSAMPLECNT),A              
+            LD      A,19                                                     ; 166.75uS
+            LD      (CMTDLY1CNTM),A
+            LD      A,19                                                     ;        + 166uS = 332.75uS
+            LD      (CMTDLY1CNTS),A
+            LD      A,43                                                     ; 333uS 
+            LD      (CMTDLY2CNTM),A                                          ; 
+            LD      A,43                                                     ;        + 334uS = 667uS
+            LD      (CMTDLY2CNTS),A                                          ; 
+            ENDIF
             RET
 
 
@@ -1155,14 +1186,54 @@ WBY1:       RLCA
 
 
 
-;---------------------------------------------------------------------------------------------------------------------
+            ;---------------------------------------------------------------------------------------------------------------------
             ; The FDC controller uses it's busy/wait signal as a ROM address line input, this
             ; causes a jump in the code dependent on the signal status. It gets around the 2MHz Z80 not being quick
             ; enough to process the signal by polling.
             ALIGN_NOPS FDCJMP2
             ORG      FDCJMP2               
 FDCJMPH3:   JP       (IY)
-;---------------------------------------------------------------------------------------------------------------------
+            ;---------------------------------------------------------------------------------------------------------------------
+
+            ;-------------------------------------------------------------------------------
+            ; START OF ADDITIONAL TZFS COMMAND METHODS
+            ;-------------------------------------------------------------------------------
+
+            ; Cmd tool to Fill memory.
+            ; Read cmd line the start address, end address and byte to initialise with, if one not present, use 00H
+            ;
+FILL:       CALL    READ4HEX
+            JR      C,FILLERR
+            PUSH    HL
+            CALL    READ4HEX
+            JR      C,FILLERR
+            LD      (TMPADR),DE
+            POP     DE                                                    ; DE = Start addr
+            OR      A
+            SBC     HL,DE                                                 ; HL - DE = Count
+            PUSH    HL
+            POP     BC                                                    ; Count of bytes to fill
+            JR      C,FILLERR                                             ; Overflow, End > Start
+            JR      Z,FILLERR                                             ; Nothing to do, Start = End
+            PUSH    DE
+            LD      DE,(TMPADR)
+            CALL    _2HEX                                                 ; Get optional byte to use for fill, default to 00H 
+            JR      NC,FILL1
+            LD      A,000H
+FILL1:      POP     HL
+            LD      (HL),A
+            PUSH    HL
+            POP     DE
+            INC     DE
+            LDIR                                                          ; Copy (HL) -> (DE) filling memory with same byte.
+            RET
+FILLERR:    LD      DE,MSGNOPARAM
+            CALL    ?PRINTMSG
+            RET
+
+            ;-------------------------------------------------------------------------------
+            ; END OF ADDITIONAL TZFS COMMAND METHODS
+            ;-------------------------------------------------------------------------------
 
             ; Ensure we fill the entire 4K by padding with FF's.
             ;

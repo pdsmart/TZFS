@@ -12,10 +12,11 @@
 ;-                  This file contains the SA-1510/1Z-013A monitor specific definitions.
 ;-
 ;- Credits:         
-;- Copyright:       (c) 2019-21 Philip Smart <philip.smart@net2net.org>
+;- Copyright:       (c) 2018-2023 Philip Smart <philip.smart@net2net.org>
 ;-
 ;- History:         May 2020  - Branch taken from RFS v2.0 and adapted for the tranZPUter SW.
 ;-                  July 2020 - Updates to accommodate v2.1 of the tranZPUter board.
+;-                  Feb 2023  - TZFS now running on FusionX. Small changes to ensure compatibility.
 ;-
 ;--------------------------------------------------------------------------------------------------------
 ;- This source file is free software: you can redistribute it and-or modify

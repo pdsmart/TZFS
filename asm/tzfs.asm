@@ -10,25 +10,28 @@
 ;-                  I/O processor in the K64F/ZPU.
 ;-
 ;- Credits:         
-;- Copyright:       (c) 2018-2020 Philip Smart <philip.smart@net2net.org>
+;- Copyright:       (c) 2018-2023 Philip Smart <philip.smart@net2net.org>
 ;-
-;- History:         May 2020  - Branch taken from RFS v2.0 and adapted for the tranZPUter SW.
-;-                  July 2020 - Not many changes but updated version to v1.1 to coincide with the
-;-                              hardware v1.1 version, thus differentiating between v1.0 board and v1.1.
-;-                  July 2020 - Updates to accomodate the v2.1 hardware. Additional commands and fixed a 
-;-                              few bugs like the load from card by name!
-;-                  Dec 2020  - Updates to accommodate v1.3 of the tranZPUter SW-700 board where soft
-;-                              CPU's now become possible.
-;-                  Jan 2021  - Additional changes to accommodate soft CPU's.
-;-                  Mar 2021  - Bug fixes - MZ-700/MZ-80A address differences.
-;-                            - Added optional machine model code on load command to enable 700/800
-;-                              programs to be loaded without changing the MZ800 mode switch.
-;-                  Apr 2021  - Added 40/80 Colour Card control. Reorganised to free up space.
-;-                  Apr 2021  - Updated to add ?RDI/?RDD/?WRI/?WRD/DIR/CD methods to ease conversion of
-;-                              programs from cassette storage to SD storage, first conversion being
-;-                              BASIC SA-5510.
-;-                  Jul 2021  - Updated the CMT routines to now be configurable so that all MZ series
-;-                              are catered for, ie. read/write 80B machines.
+;- History:         May 2020  v1.0 - Branch taken from RFS v2.0 and adapted for the tranZPUter SW.
+;-                  July 2020 v1.1 - Not many changes but updated version to v1.1 to coincide with the
+;-                                   hardware v1.1 version, thus differentiating between v1.0 board and v1.1.
+;-                  July 2020      - Updates to accomodate the v2.1 hardware. Additional commands and fixed a 
+;-                                   few bugs like the load from card by name!
+;-                  Dec 2020       - Updates to accommodate v1.3 of the tranZPUter SW-700 board where soft
+;-                                   CPU's now become possible.
+;-                  Jan 2021       - Additional changes to accommodate soft CPU's.
+;-                  Mar 2021       - Bug fixes - MZ-700/MZ-80A address differences.
+;-                                 - Added optional machine model code on load command to enable 700/800
+;-                                   programs to be loaded without changing the MZ800 mode switch.
+;-                  Apr 2021       - Added 40/80 Colour Card control. Reorganised to free up space.
+;-                  Apr 2021 v1.5  - Updated to add ?RDI/?RDD/?WRI/?WRD/DIR/CD methods to ease conversion of
+;-                                   programs from cassette storage to SD storage, first conversion being
+;-                                   BASIC SA-5510.
+;-                  Jul 2021 v1.6  - Updated the CMT routines to now be configurable so that all MZ series
+;-                                   are catered for, ie. read/write 80B machines.
+;-                  Feb 2023 v1.7  - TZFS now running on FusionX. Changes to ensure compatibility and
+;-                                   addition of new commands, assemble, disassemble, fill, write I/O,
+;-                                   read I/O.
 ;-
 ;--------------------------------------------------------------------------------------------------------
 ;- This source file is free software: you can redistribute it and-or modify
@@ -129,17 +132,28 @@ SET_FREQ:   JP       ?SETFREQ                                            ; UROMA
 ?PRTSTR:    CALLBNK PRTSTR,      TZMM_TZFS2
 ?HELP:      CALLBNK HELP,        TZMM_TZFS2
 ?MCORX:     CALLBNK MCORX,       TZMM_TZFS3
+?COPYM:     CALLBNK COPYM,       TZMM_TZFS4
+?WRITEIO:   CALLBNK WRITEIO,     TZMM_TZFS4
+?READIO:    CALLBNK READIO,      TZMM_TZFS4
 ?DUMPBC:    CALLBNK DUMPBC,      TZMM_TZFS3
 ?DUMPX:     CALLBNK DUMPX,       TZMM_TZFS3
 ?DUMP:      CALLBNK DUMP,        TZMM_TZFS3
-?INITMEMX:  CALLBNK INITMEMX,    TZMM_TZFS3
+?FILL:      CALLBNK FILL,        TZMM_TZFS3
+?GETMEM:    CALLBNK GETMEM,      TZMM_TZFS
+?SETMEM:    CALLBNK SETMEM,      TZMM_TZFS
+?DASM:      CALLBNK DASM_MAIN,   TZMM_TZFS4
+?ASM:       CALLBNK ASM_MAIN,    TZMM_TZFS4
+            IF BUILD_FUSIONX = 0
 ?SETVMODE:  CALLBNK SETVMODE,    TZMM_TZFS4
 ?SETVGAMODE:CALLBNK SETVGAMODE,  TZMM_TZFS4
 ?SETVBORDER:CALLBNK SETVBORDER,  TZMM_TZFS4
+            ENDIF   ; BUILD_FUSIONX
 ?SETFREQ:   CALLBNK SETFREQ,     TZMM_TZFS4
+            IF BUILD_FUSIONX = 0
 ?SETT80:    CALLBNK SETT80,      TZMM_TZFS4
 ?SETZ80:    CALLBNK SETZ80,      TZMM_TZFS4
 ?SETZPUEVO: CALLBNK SETZPUEVO,   TZMM_TZFS4
+            ENDIF   ; BUILD_FUSIONX
 ?TIMERTST:  CALLBNK TIMERTST,    TZMM_TZFS3
 ?PTESTX:    CALLBNK PTESTX,      TZMM_TZFS3
 ?GETMODEL:  CALLBNK GETMODEL,    TZMM_TZFS3
@@ -149,6 +163,7 @@ CNV_ATOS:   CALLBNK CNVSTR_AS,   TZMM_TZFS2                              ;
 ?RDDTZFS:   CALLBNK RDDTZFS,     TZMM_TZFS3
 ?WRITZFS:   CALLBNK WRITZFS,     TZMM_TZFS3
 ?WRDTZFS:   CALLBNK WRDTZFS,     TZMM_TZFS3
+            IF BUILD_FUSIONX = 0
 ?SETMZ80K:  CALLBNK SETMZ80K,    TZMM_TZFS4
 ?SETMZ80C:  CALLBNK SETMZ80C,    TZMM_TZFS4
 ?SETMZ1200: CALLBNK SETMZ1200,   TZMM_TZFS4
@@ -160,6 +175,7 @@ CNV_ATOS:   CALLBNK CNVSTR_AS,   TZMM_TZFS2                              ;
 ?SETMZ2000: CALLBNK SETMZ2000,   TZMM_TZFS4
 ?SETMZ2200: CALLBNK SETMZ2200,   TZMM_TZFS4
 ?SETMZ2500: CALLBNK SETMZ2500,   TZMM_TZFS4
+            ENDIF   ; BUILD_FUSIONX
             ;-----------------------------------------
 
 
@@ -284,8 +300,10 @@ SIGNON1:    CALL    DPCT
             IN      A,(CPUSTATUS)                                        ; Check to see if the T80 is running.
             AND     CPUMODE_IS_T80                                       ; T80 running?
             JR      Z,SIGNON2
-            LD      DE,MSGSONT80
-            CALL    ?PRINTMSG
+            IF BUILD_FUSIONX = 0
+              LD    DE,MSGSONT80
+              CALL  ?PRINTMSG
+            ENDIF   ; BUILD_FUSIONX
 SIGNON2:    LD      DE,MSGSONEND
             CALL    ?PRINTMSG
 
@@ -527,6 +545,14 @@ GOTOX:      CALL    HEXIYX
             JP      (HL)
 
 
+            ; Method to read a byte out of main memory when configured in default TZFS1 mode.
+GETMEM:     LD      A,(HL)
+            RET
+            ; Method to write a byte into main memory when configured in default TZFS1 mode.
+SETMEM:     LD      (HL),A
+            RET
+
+
             ;====================================
             ;
             ; Screen Width and Mode Commands
@@ -558,12 +584,18 @@ SETMODE80:  IN      A,(CPLDINFO)                                         ; Get c
 SETMODE40A: IN      A,(CPLDINFO)                                         ; Get configuration of hardware.
             BIT     3,A
             LD      A,MODE_MZ80A                                         ; Set the tranZPUter CPLD hardware translation to MZ80A mode.
-            JR      Z,SETMODE40_1
-            LD      A,VMMODE_MZ80A                                       ; Setup the display to 40 char MZ80A mode.
+            JR      NZ,SETMODE40_0
+            LD      HL,DSPCTL                                            ; Assume the 40/80 card is installed, switch to 40char mode.
+            XOR     A
+            LD      E,(HL)
+            LD      (HL),A
+            JR      SETMODE40_2
+            ;
+SETMODE40_0:LD      A,VMMODE_MZ80A                                       ; Setup the display to 40 char MZ80A mode.
             OUT     (VMCTRL),A                                           ; Activate.
             LD      A, MODE_MZ80A + MODE_VIDEO_FPGA                      ; Set the tranZPUter CPLD hardware translation to MZ80A mode with FPGA video enabled.
 SETMODE40_1:OUT     (CPLDCFG),A                                          ;
-            XOR     A
+SETMODE40_2:XOR     A
             LD      (SPAGE), A                                           ; Allow MZ80A scrolling
             LD      A,(SCRNMODE)
             RES     0, A
@@ -572,11 +604,11 @@ SETMODE40_1:OUT     (CPLDCFG),A                                          ;
             IN      A,(CPLDINFO)                                         ; Check to see if this is an MZ700, if it is not, setup the correct frequency.
             AND     007H
             CP      MODE_MZ80A
-            JR      Z,SETMODE40_2
+            JR      Z,SETMODE40_3
             LD      A,SYSMODE_MZ80A                                      ; Setup the board to run at 2MHz
             OUT     (SYSCTRL),A                                          ; Activate
 
-SETMODE40_2:LD      A,TZSVC_CMD_LOAD40ABIOS                              ; Request the I/O processor loads the SA1510 40column BIOS into memory.
+SETMODE40_3:LD      A,TZSVC_CMD_LOAD40ABIOS                              ; Request the I/O processor loads the SA1510 40column BIOS into memory.
 SETBIOS:    CALL    SVC_CMD                                              ; And make communications wit the I/O processor, returning with the result of load operation.
             OR      A
             JP      Z,MROMADDR
@@ -588,13 +620,18 @@ SETBIOS:    CALL    SVC_CMD                                              ; And m
 SETMODE80A: IN      A,(CPLDINFO)                                         ; Get configuration of hardware.
             BIT     3,A
             LD      A, MODE_MZ80A                                        ; Set the tranZPUter CPLD hardware translation to MZ80A mode.
-            JR      Z,SETMODE40_1                                        ; No hardware so cannot do 80 char mode.
+            JR      NZ,SETMODE80_0
+            LD      HL,DSPCTL                                            ; Assume the 40/80 card is installed, switch to 80char mode.
+            LD      A,128
+            LD      E,(HL)
+            LD      (HL),A
+            JR      SETMODE80_2
             ;
-            LD      A,VMMODE_MZ80A + MODE_80CHAR                         ; Setup the display to 80 char MZ80A mode.
+SETMODE80_0:LD      A,VMMODE_MZ80A + MODE_80CHAR                         ; Setup the display to 80 char MZ80A mode.
             OUT     (VMCTRL),A                                           ; Activate.
             LD      A, MODE_MZ80A + MODE_VIDEO_FPGA                      ; Set the tranZPUter CPLD hardware translation to MZ80A mode with FPGA video enabled.
 SETMODE80_1:OUT     (CPLDCFG),A                                          ;
-            LD      A, 0FFH
+SETMODE80_2:LD      A, 0FFH
             LD      (SPAGE), A                                           ; MZ80K Scrolling in 80 column mode for time being.
             LD      A,(SCRNMODE)
             SET     0, A                                                 ; Indicate 80 column mode for startup.
@@ -603,11 +640,11 @@ SETMODE80_1:OUT     (CPLDCFG),A                                          ;
             IN      A,(CPLDINFO)                                         ; Check to see if this is an MZ700, if it is not, setup the correct frequency.
             AND     007H
             CP      MODE_MZ80A
-            JR      Z,SETMODE80_2
+            JR      Z,SETMODE80_3
             LD      A,SYSMODE_MZ80A                                      ; Setup the board to run at 2MHz
             OUT     (SYSCTRL),A                                          ; Activate
 
-SETMODE80_2:LD      A,TZSVC_CMD_LOAD80ABIOS                              ; Request the I/O processor loads the SA1510 80column BIOS into memory.
+SETMODE80_3:LD      A,TZSVC_CMD_LOAD80ABIOS                              ; Request the I/O processor loads the SA1510 80column BIOS into memory.
             JR      SETBIOS
 
 
@@ -1271,11 +1308,23 @@ DIRSD4:     RET
             ;
 
             ; Quick method to load the basic interpreter. So long as the filename doesnt change this method will load and boot Basic.
-LOADBASIC:  LD      DE,BASICFILENM
+LOADBASIC:  
+            IF BUILD_MZ80A > 0
+              LD    DE,BASICFNM80A
+            ENDIF
+            IF BUILD_MZ700 > 0
+              LD    DE,BASICFNM700
+            ENDIF
             JR      LOADSDCARD
 
             ; Quick method to load CPM. So long as the filename doesnt change this method will load and boot CPM.
-LOADCPM:    LD      DE,CPMFILENAME
+LOADCPM:    
+            IF BUILD_MZ80A > 0
+              LD    DE,CPMFNAME80A
+            ENDIF
+            IF BUILD_MZ700 > 0
+              LD    DE,CPMFNAME700
+            ENDIF
             JR      LOADSDCARD
 
             ; Entry point when copying the SD file. Setup flags to indicate copying to effect any special processing.
@@ -2122,10 +2171,12 @@ L0300:      IN      A,(0D8H)	                                 	     ; State reg
             ;     B  = Characters copied (ie. B - input B = no characters).
             ;
 GETSTRING:  LD      A,(DE)                                               ; Skip white space before copy.
-            CP      ' '
+            CP      33
             JR      NC, GETSTR1
             CP      00DH
-            JR      GETSTR2                                              ; No directory means use the I/O set default.
+            JR      Z, GETSTR2                                           ; No directory means use the I/O set default.
+            OR      A
+            JR      Z, GETSTR2                                           
             INC     DE
             JR      GETSTRING
 GETSTR1:    LD      (HL),A                                               ; Copy the name entered by user. Validation is done on the I/O processor, bad directory name will result in error next read/write.
@@ -2314,8 +2365,10 @@ LOCALTEST:  LD      A,0
             RET
 
             ; Quick load program names.
-CPMFILENAME:DB      "CPM223 MZ-700-80", 000H
-BASICFILENM:DB      "S-BASIC", 000H
+CPMFNAME80A:DB      "CPM223 MZ-80A-80", 000H
+BASICFNM80A:DB      "BASIC-SA-5510-TZ", 000H
+CPMFNAME700:DB      "CPM223 MZ-700-80", 000H
+BASICFNM700:DB      "S-BASIC", 000H
 DEFAULTFN:  DB      "DEFAULT"
 DEFAULTFNE: EQU     $
 
@@ -2354,6 +2407,9 @@ CMDTABLE:  ;DB      000H | 000H | 000H | 003H
            ;DB      000H | 000H | 000H | 003H
            ;DB      "700"                                                ; Switch to 40 column MZ700 mode.
            ;DW      SETMODE700
+            DB      000H | 000H | 000H | 003H
+            DB      "ASM"                                                ; Assembler.
+            DW      ?ASM
             DB      000H | 000H | 000H | 005H
             DB      "BASIC"                                              ; Load and run BASIC SA-5510.
             DW      LOADBASIC
@@ -2364,11 +2420,14 @@ CMDTABLE:  ;DB      000H | 000H | 000H | 003H
             DB      "CPM"                                                ; Load and run CPM.
             DW      LOADCPM
             DB      000H | 000H | 000H | 002H
+            DB      "CP"                                                 ; Copy memory
+            DW      ?COPYM
+            DB      000H | 000H | 000H | 002H
             DB      "CD"                                                 ; SD Card Directory change command.
             DW      CHGSDDIR
-            DB      000H | 000H | 000H | 001H
-            DB      'C'                                                  ; Clear Memory.
-            DW      ?INITMEMX
+            DB      000H | 000H | 000H | 004H
+            DB      "DASM"                                               ; Disassembler.
+            DW      ?DASM
             DB      000H | 000H | 000H | 003H
             DB      "DIR"                                                ; List SD Card directory.
             DW      DIRSDCARD
@@ -2381,6 +2440,9 @@ CMDTABLE:  ;DB      000H | 000H | 000H | 003H
             DB      000H | 000H | 000H | 002H
             DB      "EX"                                                 ; Exit out of TZFS to original Monitor.
             DW      EXITTZFS 
+            DB      000H | 000H | 000H | 004H
+            DB      "FILL"                                               ; Fill Memory.
+            DW      ?FILL
             DB      000H | 000H | 000H | 004H
             DB      "FREQ"                                               ; Set or change the CPU frequency.
             DW      ?SETFREQ
@@ -2409,42 +2471,44 @@ CMDTABLE:  ;DB      000H | 000H | 000H | 003H
             DB      "L"                                                  ; Original Load from CMT
             DW      LOADTAPE
             ;
-            DB      000H | 000H | 000H | 005H
-            DB      "MZ80K"                                              ; Invoke MZ80K Hardware Emulation.
-            DW      ?SETMZ80K
-            DB      000H | 000H | 000H | 005H
-            DB      "MZ80C"                                              ; Invoke MZ80C Hardware Emulation.
-            DW      ?SETMZ80C
-            DB      000H | 000H | 000H | 006H
-            DB      "MZ1200"                                             ; Invoke MZ1200 Hardware Emulation.
-            DW      ?SETMZ1200
-            DB      000H | 000H | 000H | 005H
-            DB      "MZ80A"                                              ; Invoke MZ80A Hardware Emulation.
-            DW      ?SETMZ80A
-            DB      000H | 000H | 000H | 005H
-            DB      "MZ700"                                              ; Invoke MZ700 Hardware Emulation.
-            DW      ?SETMZ700
-            DB      000H | 000H | 000H | 006H
-            DB      "MZ1500"                                             ; Invoke MZ1500 Hardware Emulation.
-            DW      ?SETMZ1500
-            DB      000H | 000H | 000H | 005H
-            DB      "MZ800"                                              ; Invoke MZ800 Hardware Emulation.
-            DW      ?SETMZ800
-            DB      000H | 000H | 000H | 005H
-            DB      "MZ80B"                                              ; Invoke MZ80B Hardware Emulation.
-            DW      ?SETMZ80B
-            DB      000H | 000H | 000H | 006H
-            DB      "MZ2000"                                             ; Invoke MZ2000 Hardware Emulation.
-            DW      ?SETMZ2000
-            DB      000H | 000H | 000H | 006H
-            DB      "MZ2200"                                             ; Invoke MZ2200 Hardware Emulation.
-            DW      ?SETMZ2200
-            DB      000H | 000H | 000H | 006H
-            DB      "MZ2500"                                             ; Invoke MZ2500 Hardware Emulation.
-            DW      ?SETMZ2500
-            DB      000H | 000H | 000H | 002H
-            DB      "MZ"                                                 ; Invoke default MZ80A Hardware Emulation.
-            DW      ?SETMZ80A
+            IF BUILD_FUSIONX = 0
+              DB    000H | 000H | 000H | 005H
+              DB    "MZ80K"                                              ; Invoke MZ80K Hardware Emulation.
+              DW    ?SETMZ80K
+              DB    000H | 000H | 000H | 005H
+              DB    "MZ80C"                                              ; Invoke MZ80C Hardware Emulation.
+              DW    ?SETMZ80C
+              DB    000H | 000H | 000H | 006H
+              DB    "MZ1200"                                             ; Invoke MZ1200 Hardware Emulation.
+              DW    ?SETMZ1200
+              DB    000H | 000H | 000H | 005H
+              DB    "MZ80A"                                              ; Invoke MZ80A Hardware Emulation.
+              DW    ?SETMZ80A
+              DB    000H | 000H | 000H | 005H
+              DB    "MZ700"                                              ; Invoke MZ700 Hardware Emulation.
+              DW    ?SETMZ700
+              DB    000H | 000H | 000H | 006H
+              DB    "MZ1500"                                             ; Invoke MZ1500 Hardware Emulation.
+              DW    ?SETMZ1500
+              DB    000H | 000H | 000H | 005H
+              DB    "MZ800"                                              ; Invoke MZ800 Hardware Emulation.
+              DW    ?SETMZ800
+              DB    000H | 000H | 000H | 005H
+              DB    "MZ80B"                                              ; Invoke MZ80B Hardware Emulation.
+              DW    ?SETMZ80B
+              DB    000H | 000H | 000H | 006H
+              DB    "MZ2000"                                             ; Invoke MZ2000 Hardware Emulation.
+              DW    ?SETMZ2000
+              DB    000H | 000H | 000H | 006H
+              DB    "MZ2200"                                             ; Invoke MZ2200 Hardware Emulation.
+              DW    ?SETMZ2200
+              DB    000H | 000H | 000H | 006H
+              DB    "MZ2500"                                             ; Invoke MZ2500 Hardware Emulation.
+              DW    ?SETMZ2500
+              DB    000H | 000H | 000H | 002H
+              DB    "MZ"                                                 ; Invoke default MZ80A Hardware Emulation.
+              DW    ?SETMZ80A
+            ENDIF
             ;
             DB      000H | 000H | 000H | 001H
             DB      'M'                                                  ; Edit Memory.
@@ -2452,6 +2516,9 @@ CMDTABLE:  ;DB      000H | 000H | 000H | 003H
             DB      000H | 000H | 000H | 001H
             DB      'P'                                                  ; Printer test.
             DW      ?PTESTX
+            DB      000H | 000H | 000H | 003H
+            DB      "RIO"                                                ; Read I/O
+            DW      ?READIO
             DB      000H | 000H | 000H | 001H
             DB      'R'                                                  ; Memory test.
             DW      MEMTEST
@@ -2476,31 +2543,40 @@ CMDTABLE:  ;DB      000H | 000H | 000H | 003H
             DB      000H | 000H | 000H | 004H
             DB      "T2SD"                                               ; Copy Tape to SD Card.
             DW      TAPE2SD
-            DB      000H | 000H | 000H | 003H
-            DB      "T80"                                                ; Switch to soft T80 CPU.
-            DW      ?SETT80
+            IF BUILD_FUSIONX = 0
+              DB    000H | 000H | 000H | 003H
+              DB    "T80"                                                ; Switch to soft T80 CPU.
+              DW    ?SETT80
+            ENDIF
             DB      000H | 000H | 000H | 001H
             DB      'T'                                                  ; Timer test.
             DW      ?TIMERTST
-            DB      000H | 000H | 000H | 007H
-            DB      "VBORDER"                                            ; Set VGA border colour.
-            DW      ?SETVBORDER
-            DB      000H | 000H | 000H | 005H
-            DB      "VMODE"                                              ; Set VGA mode.
-            DW      ?SETVMODE
-            DB      000H | 000H | 000H | 003H
-            DB      "VGA"                                                ; Set VGA mode.
-            DW      ?SETVGAMODE
+            IF BUILD_FUSIONX = 0
+              DB    000H | 000H | 000H | 007H
+              DB    "VBORDER"                                            ; Set VGA border colour.
+              DW    ?SETVBORDER
+              DB    000H | 000H | 000H | 005H
+              DB    "VMODE"                                              ; Set VGA mode.
+              DW    ?SETVMODE
+              DB    000H | 000H | 000H | 003H
+              DB    "VGA"                                                ; Set VGA mode.
+              DW    ?SETVGAMODE
+            ENDIF
             DB      000H | 000H | 000H | 001H
             DB      'V'                                                  ; Verify CMT Save.
             DW      VRFYX
             DB      000H | 000H | 000H | 003H
-            DB      "Z80"                                                ; Switch to soft Z80 CPU.
-            DW      ?SETZ80
-            DB      000H | 000H | 000H | 003H
-            DB      "ZPU"                                                ; Switch to soft ZPU Evolution CPU.
-            DW      ?SETZPUEVO
-            DB      000H | 000H | 000H | 001H
+            DB      "WIO"                                                ; Write I/O
+            DW      ?WRITEIO
+            IF BUILD_FUSIONX = 0
+              DB     000H | 000H | 000H | 003H
+              DB    "Z80"                                                ; Switch to soft Z80 CPU.
+              DW    ?SETZ80
+              DB    000H | 000H | 000H | 003H
+              DB    "ZPU"                                                ; Switch to soft ZPU Evolution CPU.
+              DW    ?SETZPUEVO
+              DB    000H | 000H | 000H | 001H
+            ENDIF
 
 
 
