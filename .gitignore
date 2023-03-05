@@ -201,3 +201,4 @@ dz80.ini
 full.asm
 full.bin
 MZ800_IOCS.ref
+asm/tzfs_bank5.asm
