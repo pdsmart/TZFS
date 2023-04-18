@@ -34,8 +34,8 @@
 ;-----------------------------------------------
 ; Features.
 ;-----------------------------------------------
-BUILD_MZ80A             EQU     1                                        ; Build for the standard Sharp MZ80A, no lower memory.
-BUILD_MZ700             EQU     0                                        ; Build for the Sharp MZ-700 base hardware.
+BUILD_MZ80A             EQU     0                                        ; Build for the standard Sharp MZ80A, no lower memory.
+BUILD_MZ700             EQU     1                                        ; Build for the Sharp MZ-700 base hardware.
 BUILD_MZ2000            EQU     0                                        ; Build for the Sharp MZ-2000 base hardware.
 BUILD_FUSIONX           EQU     1                                        ; Build for the set host using the FusionX board.
 

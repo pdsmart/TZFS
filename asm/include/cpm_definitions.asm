@@ -7,7 +7,7 @@
 ;-                  Definitions for the Sharp MZ80A CPM v2.23 OS used in the RFS
 ;-
 ;- Credits:         
-;- Copyright:       (c) 2019-21 Philip Smart <philip.smart@net2net.org>
+;- Copyright:       (c) 2019-23 Philip Smart <philip.smart@net2net.org>
 ;-
 ;- History:         Jan 2020 - Initial version.
 ;                   May 2020 - Advent of the new RFS PCB v2.0, quite a few changes to accommodate the
@@ -15,6 +15,7 @@
 ;                              not using the printer interface card.
 ;                   May 2020 - Cut from the RFS version of CPM for the tranZPUter SW board.
 ;-                  Apr 2021 - Updates backported from the RFS version of CPM.
+;-                  Mar 2023 - Updates to accommodate the FusionX.
 ;-
 ;--------------------------------------------------------------------------------------------------------
 ;- This source file is free software: you can redistribute it and-or modify
@@ -53,6 +54,13 @@ BUILD_80C                 EQU   1                                        ; Build
 BUILD_VIDEOMODULE         EQU   0                                        ; Build for the Video Module v2 board (=1) otherwise build for the 80Char Colour Board v1.0
 BUILD_MZ80A               EQU   1                                        ; Build for the Sharp MZ-80A base hardware.
 BUILD_MZ700               EQU   0                                        ; Build for the Sharp MZ-700 base hardware.
+BUILD_80C                 EQU   0                                        ; Build for an 80 column (Video Module or 40/80 Colour Card) equipped machine, 0 = standard 40 column.
+                        ENDIF
+                        ; CPM for MZ-700 with with standard 40 column display.
+                        IF BUILD_VERSION = 3
+BUILD_VIDEOMODULE         EQU   0                                        ; Build for the Video Module v2 board (=1) otherwise build for the 80Char Colour Board v1.0
+BUILD_MZ80A               EQU   0                                        ; Build for the Sharp MZ-80A base hardware.
+BUILD_MZ700               EQU   1                                        ; Build for the Sharp MZ-700 base hardware.
 BUILD_80C                 EQU   0                                        ; Build for an 80 column (Video Module or 40/80 Colour Card) equipped machine, 0 = standard 40 column.
                         ENDIF
 

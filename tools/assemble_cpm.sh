@@ -12,6 +12,7 @@
 ##
 ## History:         January 2020   - Initial script written.
 ##                  February 2023  - Updated as TZFS extracted into seperate repository.
+##                  Mar 2023       - Updates to accommodate FusionX.
 ##
 #########################################################################################################
 ## This source file is free software: you can redistribute it and/or modify
@@ -39,7 +40,7 @@ INCDIR=${ROOTDIR}/asm/include
 ROMDIR=${ROOTDIR}/roms                     # Compiled or source ROM files.
 HDRDIR=${ROOTDIR}/hdr                      # MZF headers directory.
 MZFDIR=${ROOTDIR}/MZF/Common               # MZF Format source files.
-CPMVERSIONS="mz700_80c:0 mz80a_80c:1 mz80a_40c:2"
+CPMVERSIONS="mz700_80c:0 mz80a_80c:1 mz80a_40c:2 mz700_40c:3"
 
 # As the tranZPUter project has eveolved different variants of CP/M are needed, so this loop along with the CPMVERSIONS string builds the versions as needed.
 for ver in ${CPMVERSIONS}
