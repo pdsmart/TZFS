@@ -415,7 +415,7 @@ FDCJMPL2:   JP       (IX)
             ;-------------------------------------------------------------------------------
             ;        0                                       + <- 39
             ;        -----------------------------------------
-MSGSON:     DB      "+ TZFS v1.7 ",                                                       NULL                     ; Version 1.0-> first split from RFS v2.0
+MSGSON:     DB      "+ TZFS v1.7.1 ",                                                     NULL                     ; Version 1.0-> first split from RFS v2.0
 MSGSONEND:  DB      " **",                                                          CR,   NULL                     ; Signon banner termination.
             IF BUILD_FUSIONX = 0
 MSGSONT80:  DB      "(T80)",                                                              NULL                     ; T80 CPU detected.

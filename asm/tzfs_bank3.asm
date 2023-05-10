@@ -737,16 +737,17 @@ RD1:        CALL    MOTOR
             JR      C,STPEIR
             CALL    RTAPETZFS
             JR      C,STPEIR
-RET2S:      BIT     3,D
-            JR      Z,EIRTN
+            JR      EIRTN
+;RET2S:      BIT     3,D
+;            JR      Z,EIRTN
 STPEIR:     CALL    BRKEY                                                    ; Double check reason for exit, was it a break key?
             LD      A,01H
             JR      NC,STPEIR1
             LD      A,02H
 STPEIR1:    LD      (RESULT),A                                               ; Store result for later use.
-            CALL    MSTOP
             SCF                                                              ; Indicate error condition.
-EIRTN:      EI      
+EIRTN:      CALL    MSTOP
+            EI      
             RET  
 
             ;READ DATA
