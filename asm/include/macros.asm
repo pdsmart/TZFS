@@ -28,12 +28,12 @@
 
             ; the following is only to get the original length of 2048 bytes
 ALIGN:      MACRO    ?boundary
-            DS       ?boundary - 1 - ($ + ?boundary - 1) % ?boundary, 0FFh
+              DS     ?boundary - 1 - ($ + ?boundary - 1) % ?boundary, 0FFh
             ENDM
 
             ; the following is only to get the original length of 2048 bytes
 ALIGN_NOPS: MACRO    ?boundary
-            DS       ?boundary - 1 - ($ + ?boundary - 1) % ?boundary, 000h
+              DS     ?boundary - 1 - ($ + ?boundary - 1) % ?boundary, 000h
             ENDM
 
             ;
@@ -45,7 +45,7 @@ PAD:        MACRO ?address
 		        ERROR "Alignment exceeds %s"; % ?address
 	        ENDIF
 	        DS ?address - $
-	        ENDM
+	    ENDM
 
             ;
             ; Pads up to the next multiple of the specified address.
@@ -59,7 +59,7 @@ PAD:        MACRO ?address
             ;
 ALIGN_FIT8: MACRO ?size
 	        DS      (($ + ?size - 1) >> 8) != ($ >> 8) && (100H - ($ & 0FFH)) || 0
-	        ENDM
+	    ENDM
 
             ; Macro to create a Jump table entry point for a Bank to Bank function call.
             ; The address of the real function in the required page is given as ?addr
@@ -73,7 +73,7 @@ CALLBNK:    MACRO ?addr, ?bank
             LD      HL,?addr                                             ; Real function to call.
             LD      A,?bank                                              ; Bank in which the function resides.
             JP      BANKTOBANK_
-	        ENDM
+	    ENDM
 
             ; As above but just jump to the required location in the alternate bank, no return.
 JMPBNK:     MACRO ?addr, ?bank
@@ -84,7 +84,7 @@ JMPBNK:     MACRO ?addr, ?bank
             EX      AF,AF'
             LD      HL,?addr                                             ; Real function to jump to.
             JP      (HL)
-	        ENDM
+	    ENDM
 
             ; Method to allow one bank to call a routine in another bank with all registers preserved in and out and
             ; reentrant so banks can call banks. It is costly in processing time and should only be

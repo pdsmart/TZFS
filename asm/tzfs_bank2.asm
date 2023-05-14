@@ -18,6 +18,7 @@
 ;-                  Dec 2020  - Updates to accommodate v1.3 of the tranZPUter SW-700 board where soft
 ;-                              CPU's now become possible.
 ;-                  Feb 2023  - TZFS now running on FusionX. Small changes to ensure compatibility.
+;-                  May 2023  - Added tape delay compensation command.
 ;-
 ;--------------------------------------------------------------------------------------------------------
 ;- This source file is free software: you can redistribute it and-or modify
@@ -415,10 +416,10 @@ FDCJMPL2:   JP       (IX)
             ;-------------------------------------------------------------------------------
             ;        0                                       + <- 39
             ;        -----------------------------------------
-MSGSON:     DB      "+ TZFS v1.7.1 ",                                                     NULL                     ; Version 1.0-> first split from RFS v2.0
+MSGSON:     DB      "+ TZFS v1.8.0 ",                                                     NULL                     ; Version 1.0-> first split from RFS v2.0
 MSGSONEND:  DB      " **",                                                          CR,   NULL                     ; Signon banner termination.
-            IF BUILD_FUSIONX = 0
-MSGSONT80:  DB      "(T80)",                                                              NULL                     ; T80 CPU detected.
+MSGSONT80:  IF BUILD_FUSIONX = 0
+              DB    "(T80)",                                                              NULL                     ; T80 CPU detected.
             ENDIF   ; BUILD_FUSIONX
 MSGNOTFND:  DB      "Not Found",                                                    CR,   NULL
 MSGBADCMD:  DB      "???",                                                          CR,   NULL
@@ -449,14 +450,26 @@ MSGFAILBIOS:DB      "Failed to load alternate BIOS!",                           
 MSGFAILEXIT:DB      "TZFS exit failed, I/O proc error!",                            CR,   NULL
 MSGFREQERR: DB      "Error, failed to change frequency!",                           CR,   NULL
 MSGBADNUM:  DB      "Error, bad number supplied!",                                  CR,   NULL
-            IF BUILD_FUSIONX = 0
-MSGNOFPGA:  DB      "Error, no FPGA video module!",                                 CR,   NULL
-MSGT80ERR:  DB      "Error, failed to switch to T80 CPU!",                          CR,   NULL
-MSGZ80ERR:  DB      "Error, failed to switch to Z80 CPU!",                          CR,   NULL
-MSGZPUERR:  DB      "Error, failed to switch to ZPU CPU!",                          CR,   NULL
-MSGNOSOFTCPU:DB     "No soft cpu hardware!",                                        CR,   NULL
-MSGNOT80CPU:DB      "T80 not available!",                                           CR,   NULL
-MSGNOEMU:   DB      "No Sharp MZ Series Emu hardware!",                             CR,   NULL
+MSGNOFPGA:  IF BUILD_FUSIONX = 0
+              DB    "Error, no FPGA video module!",                                 CR,   NULL
+            ENDIF   ; BUILD_FUSIONX
+MSGT80ERR:  IF BUILD_FUSIONX = 0
+              DB    "Error, failed to switch to T80 CPU!",                          CR,   NULL
+            ENDIF   ; BUILD_FUSIONX
+MSGZ80ERR:  IF BUILD_FUSIONX = 0
+              DB    "Error, failed to switch to Z80 CPU!",                          CR,   NULL
+            ENDIF   ; BUILD_FUSIONX
+MSGZPUERR:  IF BUILD_FUSIONX = 0
+              DB    "Error, failed to switch to ZPU CPU!",                          CR,   NULL
+            ENDIF   ; BUILD_FUSIONX
+MSGNOSOFTCPU:IF BUILD_FUSIONX = 0
+              DB   "No soft cpu hardware!",                                        CR,   NULL
+            ENDIF   ; BUILD_FUSIONX
+MSGNOT80CPU:IF BUILD_FUSIONX = 0
+              DB    "T80 not available!",                                           CR,   NULL
+            ENDIF   ; BUILD_FUSIONX
+MSGNOEMU:   IF BUILD_FUSIONX = 0
+              DB    "No Sharp MZ Series Emu hardware!",                             CR,   NULL
             ENDIF   ; BUILD_FUSIONX
 ;
 OKCHECK:    DB      ", CHECK: ",                                                    CR,   NULL
@@ -543,9 +556,9 @@ HELPSCR:    ;       "--------- 40 column width -------------"
             DB      "         add NX for no exec, ie.LCNX",                00DH
             DB      "MXXXX    edit memory starting at XXXX",               00DH
             IF BUILD_FUSIONX = 0
-            DB      "MZmc     activate hardware emulation",                00DH
-            DB      "         mc =80K,80C,1200,80A,700,800,",              00DH
-            DB      "             80B,2000",                               00DH
+              DB    "MZmc     activate hardware emulation",                00DH
+              DB    "         mc =80K,80C,1200,80A,700,800,",              00DH
+              DB    "             80B,2000",                               00DH
             ENDIF   ; BUILD_FUSIONX
             DB      "P        test printer",                               00DH
             DB      "R        test dram memory",                           00DH
@@ -558,19 +571,20 @@ HELPSCR:    ;       "--------- 40 column width -------------"
             DB      "         save mem to card, XXXX=start",               00DH
             DB      "                 YYYY=end, ZZZZ=exec",                00DH
             DB      "T        test timer",                                 00DH
+            DB      "TC[-]XX  set tape delay compensation",                00DH
             DB      "T2SD[B][,M]",                                         00DH
             DB      "         copy tape to SD, B=Bulk",                    00DH
             IF BUILD_FUSIONX = 0
-            DB      "T80      switch to soft T80 CPU",                     00DH
+              DB    "T80      switch to soft T80 CPU",                     00DH
             ENDIF   ; BUILD_FUSIONX
             DB      "V        verify tape save",                           00DH
             DB      "WIOXXXXYY Write YY to I/O port XXXX",                 00DH
             IF BUILD_FUSIONX = 0
-            DB      "VBORDERn set vga border colour",                      00DH
-            DB      "VMODEn   set video mode",                             00DH
-            DB      "VGAn     set VGA mode",                               00DH
-            DB      "Z80      switch to hard Z80 CPU",                     00DH
-            DB      "ZPU      switch to ZPU Evo CPU / zOS",                00DH
+              DB    "VBORDERn set vga border colour",                      00DH
+              DB    "VMODEn   set video mode",                             00DH
+              DB    "VGAn     set VGA mode",                               00DH
+              DB    "Z80      switch to hard Z80 CPU",                     00DH
+              DB    "ZPU      switch to ZPU Evo CPU / zOS",                00DH
             ENDIF   ; BUILD_FUSIONX
             ;       "--------- 40 column width -------------"
             DB                                                              000H

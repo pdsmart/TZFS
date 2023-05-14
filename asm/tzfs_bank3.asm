@@ -614,6 +614,8 @@ SLPT:       DB      01H                                                  ; TEXT 
             ;-------------------------------------------------------------------------------
 
             ; Method to setup the delay loop count to set the half-wave period of the sampling, short and long CMT pulses.
+            ; To allow the user to compensate for tape stretch or drive belt wear, a compensation value can be added/subtracted
+            ; from the precise time values.
             ;
             ; Opcode timings:
             ; CALL      - 17 T-states time from caller into function.
@@ -630,6 +632,10 @@ SLPT:       DB      01H                                                  ; TEXT 
             ;          MZ-700 - x = ((delay * 3540000) - 66) / 14
             ;          MZ-80A - x = ((delay * 2000000) - 66) / 14
 CMTSETDLY:  IF BUILD_MZ700 > 0
+            PUSH    BC                                                       ; Store the compensation value in B to be added into fixed delay value.
+            LD      A,(CMTDLYCOMP)
+            LD      B,A
+            ;
             LD      A,(HWMODEL)                                              ; Get the machine model we are conforming to.
             CP      5                                                        ; MZ-800 has its own timing.
             JR      Z,CMTSETDLY0
@@ -640,43 +646,64 @@ CMTSETDLY:  IF BUILD_MZ700 > 0
             ;
             ; K Series
             LD      A,86                                                     ; Remainder of the machines use a 1200 baud setting,
+            ADD     A,B
             LD      (CMTSAMPLECNT),A                                         ; 368uS sample point.
             LD      A,56                                                     ; 
+            ADD     A,B
             LD      (CMTDLY1CNTM),A                                          ; 240us 
             LD      A,62                                                     ; 
+            ADD     A,B
             LD      (CMTDLY1CNTS),A                                          ;       + 264uS = 504uS
             LD      A,113
+            ADD     A,B
             LD      (CMTDLY2CNTM),A                                          ; 464uS 
             LD      A,120
+            ADD     A,B
             LD      (CMTDLY2CNTS),A                                          ;       + 494uS = 958uS
-            RET
+            JR      CMTDLYEXIT
             ; MZ-800
 CMTSETDLY0: LD      A,89                                                     ; 379uS sample point
+            ADD     A,B
             LD      (CMTSAMPLECNT),A
             LD      A,56                                                     ; 240uS
+            ADD     A,B
             LD      (CMTDLY1CNTM),A
             LD      A,66                                                     ;       + 278uS = 518uS
+            ADD     A,B
             LD      (CMTDLY1CNTS),A
             LD      A,114                                                    ; 470uS
+            ADD     A,B
             LD      (CMTDLY2CNTM),A                                          ; 
             LD      A,120                                                    ;       + 494uS = 964uS
+            ADD     A,B
             LD      (CMTDLY2CNTS),A                                          ; 
-            RET
+            JR      CMTDLYEXIT
             ; B Series
 CMTSETDLY1: LD      A,52                                                     ; 255uS sample point.
+            ADD     A,B
             LD      (CMTSAMPLECNT),A              
             LD      A,37                                                     ; 166.75uS
+            ADD     A,B
             LD      (CMTDLY1CNTM),A
             LD      A,37                                                     ;        + 166uS = 332.75uS
+            ADD     A,B
             LD      (CMTDLY1CNTS),A
             LD      A,80                                                     ; 333uS 
+            ADD     A,B
             LD      (CMTDLY2CNTM),A                                          ; 
             LD      A,80                                                     ;        + 334uS = 667uS
+            ADD     A,B
             LD      (CMTDLY2CNTS),A                                          ; 
+            JR      CMTDLYEXIT
             ENDIF
+
             ; The values below are for an MZ-80A running at 2MHz under the FusionX board.
             ; If TZFS runs on more platforms then a table will be the best method forward.
             IF BUILD_MZ80A > 0
+            PUSH    BC                                                       ; Store the compensation value in B to be added into fixed delay value.
+            LD      A,(CMTDLYCOMP)
+            LD      B,A
+            ;
             LD      A,(HWMODEL)                                              ; Get the machine model we are conforming to.
             CP      5                                                        ; MZ-800 has its own timing.
             JR      Z,CMTSETDLY0
@@ -687,42 +714,58 @@ CMTSETDLY1: LD      A,52                                                     ; 2
             ;
             ; K Series
             LD      A,47                                                     ; Remainder of the machines use a 1200 baud setting,
+            ADD     A,B
             LD      (CMTSAMPLECNT),A                                         ; 368uS sample point.
             LD      A,30                                                     ; 
+            ADD     A,B
             LD      (CMTDLY1CNTM),A                                          ; 240us 
             LD      A,33                                                     ; 
+            ADD     A,B
             LD      (CMTDLY1CNTS),A                                          ;       + 264uS = 504uS
             LD      A,62
+            ADD     A,B
             LD      (CMTDLY2CNTM),A                                          ; 464uS 
             LD      A,66
+            ADD     A,B
             LD      (CMTDLY2CNTS),A                                          ;       + 494uS = 958uS
-            RET
+            JR      CMTDLYEXIT
             ; MZ-800
 CMTSETDLY0: LD      A,49                                                     ; 379uS sample point
+            ADD     A,B
             LD      (CMTSAMPLECNT),A
             LD      A,30                                                     ; 240uS
+            ADD     A,B
             LD      (CMTDLY1CNTM),A
             LD      A,35                                                     ;       + 278uS = 518uS
+            ADD     A,B
             LD      (CMTDLY1CNTS),A
             LD      A,62                                                     ; 470uS
+            ADD     A,B
             LD      (CMTDLY2CNTM),A                                          ; 
             LD      A,66                                                     ;       + 494uS = 964uS
+            ADD     A,B
             LD      (CMTDLY2CNTS),A                                          ; 
-            RET
+            JR      CMTDLYEXIT
             ; B Series
 CMTSETDLY1: LD      A,32                                                     ; 255uS sample point.
+            ADD     A,B
             LD      (CMTSAMPLECNT),A              
             LD      A,19                                                     ; 166.75uS
+            ADD     A,B
             LD      (CMTDLY1CNTM),A
             LD      A,19                                                     ;        + 166uS = 332.75uS
+            ADD     A,B
             LD      (CMTDLY1CNTS),A
             LD      A,43                                                     ; 333uS 
+            ADD     A,B
             LD      (CMTDLY2CNTM),A                                          ; 
             LD      A,43                                                     ;        + 334uS = 667uS
+            ADD     A,B
             LD      (CMTDLY2CNTS),A                                          ; 
+            JR      CMTDLYEXIT
             ENDIF
+CMTDLYEXIT: POP     BC
             RET
-
 
             ;READ INFORMATION
             ;      CF=1:ERROR
@@ -1231,6 +1274,395 @@ FILL1:      POP     HL
 FILLERR:    LD      DE,MSGNOPARAM
             CALL    ?PRINTMSG
             RET
+
+            ; Tape Compensation Setup.
+            ; Set a value which is added to or subtracted from the tape delay timing.
+            ; This compensation value is to allow for old stretched tapes or machines with warped/stretched drive bands.
+            ;
+TAPECOMP:   LD      A,(DE)                                               ; Test the first character, if minus then set bit 0 in B for later use.
+            CP      '-'
+            LD      A,0
+            JR      NZ,TAPECOMP1
+            INC     DE                                                   ; Skip over minus.
+            INC     A                                                    ; Set bit 0 to indicate negative number.
+TAPECOMP1:  LD      B,A
+            CALL    ConvertStringToNumber                                ; Convert the input into compensation value.
+            JP      NZ,BADNUMERR
+            LD      A,L
+            CP      080H                                                 ; Numbers > 127 are illegal.
+            JP      NC,BADNUMERR
+            BIT     0,B
+            JR      Z,TAPECOMP2
+            NEG
+TAPECOMP2:  LD      (CMTDLYCOMP),A                                       ; Store compensation value to be used by delay calculations.
+            RET
+
+            ; Copy - Source, Destination, Size.
+COPYM:      CALL    READ4HEX                                             ; Start address
+            JR      C,COPYMERR
+            LD      (TMPADR),HL
+            CALL    READ4HEX
+            JR      C,COPYMERR
+            LD      (TMPCNT),HL
+            CALL    READ4HEX
+            JR      C,COPYMERR
+            PUSH    HL
+            POP     BC
+            LD      HL,(TMPCNT)
+            LD      DE,(TMPADR)
+            LDIR
+COPYMERR:   RET
+
+            ; Write to I/O port. 16bit address to BC, 8bit value to A.
+WRITEIO:    CALL    READ4HEX                                             ; Get 16bit I/O port.
+            JR      C,WRITEIOER
+            PUSH    HL                                                   ; Swap to BC so B=15:8, C=7:0
+            POP     BC
+            CALL    _2HEX                                                ; Get 8 bit data.
+            OUT     (C),A                                                ; Write 8 bit data to 16bit port.
+WRITEIOER:  RET
+
+            ; Read 16bit I/O port value.
+READIO:     CALL    READ4HEX                                             ; Get 16bit I/O port.
+            JR      C,READIOER
+            PUSH    HL                                                   ; Swap to BC so B=15:8, C=7:0
+            POP     BC
+            IN      A,(C)                                                ; Get 8bit value from 16bit I/O port.
+            CALL    PRTHX                                                ; Print.
+            CALL    NL
+READIOER:   RET
+ 
+            ; FusionX doesnt yet have the video capabilities, so no need to build in the logic.
+SETVMODE:   IF BUILD_FUSIONX = 0
+              ; Method to set the video mode.
+              ; Param: 0 - Enable FPGA and set to MZ-80K mode.
+              ;        1 - Enable FPGA and set to MZ-80C mode.
+              ;        2 - Enable FPGA and set to MZ-1200 mode.
+              ;        3 - Enable FPGA and set to MZ-80A mode (base mode on MZ-80A hardware).
+              ;        4 - Enable FPGA and set to MZ-700 mode (base mode on MZ-700 hardware).
+              ;        5 - Enable FPGA and set to MZ-1500 mode.
+              ;        6 - Enable FPGA and set to MZ-800 mode.
+              ;        7 - Enable FPGA and set to MZ-80B mode.
+              ;        8 - Enable FPGA and set to MZ-2000 mode.
+              ;        9 - Enable FPGA and set to MZ-2200 mode.
+              ;       10 - Enable FPGA and set to MZ-2500 mode.
+              ;        O - Turn off FPGA Video, turn on mainboard video.
+              IN    A,(CPLDINFO)                                         ; Get configuration of hardware.
+              BIT   3,A
+              JP    Z,NOFPGAERR                                          ; No hardware so cannot change mode.
+              PUSH  DE                                                   ; Preserve DE in case no number given.
+              POP   BC
+              CALL  ConvertStringToNumber                                ; Convert the input into 0 (disable) or frequency in KHz.
+              JR    NZ,SETVMODEOFF
+              LD    A,H
+              CP    0
+              JP    NZ,BADNUMERR                                         ; Check that the given mode is in range 0 - 7.
+              LD    A,L
+              CP    10
+              JP    NC,BADNUMERR
+              ;
+SETVMODE0:    IN    A,(CPLDCFG) 
+              OR    MODE_VIDEO_FPGA                                      ; Set the tranZPUter CPLD hardware to enable the FPGA video mode.
+              OUT   (CPLDCFG),A                                 
+              ;
+              IN    A,(VMCTRL)                                           ; Get current setting.
+              AND   0F0H                                                 ; Clear old mode setting.
+              OR    L                                                    ; Add in new setting.
+              OUT   (VMCTRL),A
+              RLC   L                                                    ; Shift mode to position for SCRNMODE storage.
+              RLC   L
+              RLC   L
+              RLC   L
+              LD    A,(SCRNMODE)                                         ; Repeat for the screen mode variable, used when resetting or changing display settings.
+              AND   007H                                                 ; Clear video mode setting.
+              OR    L                                                    ; Add in new setting.
+              SET   2, A                                                 ; Set flag to indicate video mode override - ie, dont use base machine mode.
+SETVMODECLR:  SET   1, A                                                 ; Ensure flag set so on restart the FPGA video mode is selected.
+              LD    (SCRNMODE),A
+              LD    A, 016H                                              ; Clear the screen so we start from a known position.
+              CALL  PRNT
+              LD    A,071H                                               ; Blue background and white characters.
+              LD    HL,ARAM
+              CALL  CLR8
+              RET
+SETVMODEOFF:  LD    A,(DE)
+              CP    'O'
+              JR    Z,SETVMODE1
+              CP    'o'
+              JP    NZ,BADNUMERR
+SETVMODE1:    LD    A,(SCRNMODE)                                         ; Disable flag to enable FPGA on restart.
+              RES   1,A
+              LD    (SCRNMODE),A
+              IN    A,(CPLDCFG) 
+              AND   ~MODE_VIDEO_FPGA                                     ; Set the tranZPUter CPLD hardware to disable the FPGA video mode.
+              OUT   (CPLDCFG),A                                 
+              RET
+            ENDIF
+            
+            ; Method to set the VGA output mode of the external display.
+SETVGAMODE: IF BUILD_FUSIONX = 0
+              IN    A,(CPLDINFO)                                         ; Get configuration of hardware.
+              BIT   3,A
+              JP    Z,NOFPGAERR                                          ; No hardware so cannot change mode.
+              CALL  ConvertStringToNumber                                ; Convert the input into 0-3, 0 = off, 1 = 640x480, 2=1024x768, 3=800x600.
+              JP    NZ,BADNUMERR
+              LD    A,H
+              CP    0
+              JP    NZ,BADNUMERR                                         ; Check that the given mode is in range 0 - 15.
+              LD    A,L
+              CP    15
+              JP    NC,BADNUMERR
+              ;
+           ;  RRC   L
+           ;  RRC   L                                                    ; Value to top 2 bits ready to be applied to VGA mode register.
+              ;
+SETVGAMODE1:  IN    A,(CPLDCFG) 
+              OR    MODE_VIDEO_FPGA                                      ; Set the tranZPUter CPLD hardware to enable the FPGA video mode.
+              OUT   (CPLDCFG),A                                 
+              ;
+              LD    A, L                                                 ; Add in new setting.
+              OUT   (VMVGAMODE),A
+              LD    (SCRNMODE2), A
+              JP    SETVMODECLR
+            ENDIF
+
+            ; Method to set the VGA border colour on the external display.
+SETVBORDER: IF BUILD_FUSIONX = 0
+              IN    A,(CPLDINFO)                                         ; Get configuration of hardware.
+              BIT   3,A
+              JP    Z,NOFPGAERR                                          ; No hardware so cannot change mode.
+              CALL  ConvertStringToNumber                                ; Convert the input into 0 - 7, bit 2 = Red, 1 = Green, 0 = Blue.
+              JP    NZ,BADNUMERR
+              LD    A,H
+              CP    0
+              JP    NZ,BADNUMERR                                         ; Check that the given mode is in range 0 - 7.
+              LD    A,L
+              CP    7
+              JP    NC,BADNUMERR
+              ;
+              IN    A,(CPLDCFG) 
+              OR    MODE_VIDEO_FPGA                                      ; Set the tranZPUter CPLD hardware to enable the FPGA video mode.
+              OUT   (CPLDCFG),A                                 
+              ;
+              LD    A,L
+              OUT   (VMVGATTR),A
+              RET
+            ENDIF  ; BUILD_FUSIONX
+
+            ; Method to enable/disable the alternate CPU frequency and change it's values.
+            ;
+SETFREQ:    IF BUILD_FUSIONX = 0
+              CALL  ConvertStringToNumber                                ; Convert the input into 0 (disable) or frequency in KHz.
+              JP    NZ,BADNUMERR
+              LD    (TZSVC_CPU_FREQ),HL                                  ; Set the required frequency in the service structure.
+              LD    A,H
+              CP    L
+              JR    NZ,SETFREQ1
+              LD    A, TZSVC_CMD_CPU_BASEFREQ                            ; Switch to the base frequency.
+              JR    SETFREQ2
+SETFREQ1:     LD    A, TZSVC_CMD_CPU_ALTFREQ                             ; Switch to the alternate frequency.
+SETFREQ2:     CALL  SVC_CMD
+              OR    A
+              JP    NZ,SETFREQERR
+              LD    A,H
+              CP    L
+              RET   Z                                                    ; If we are disabling the alternate cpu frequency (ie. = 0) exit.
+              LD    A, TZSVC_CMD_CPU_CHGFREQ                             ; Switch to the base frequency.
+              CALL  SVC_CMD
+              OR    A
+              JP    NZ,SETFREQERR
+              RET
+            ENDIF  ; BUILD_FUSIONX
+
+            ; FusionX doesnt have the soft CPU capabilities, so no need to build in the logic.
+SETT80:     IF BUILD_FUSIONX = 0
+
+              ; Method to configure the hardware to use the T80 CPU instantiated in the FPGA.
+              ;
+              IN    A,(CPUINFO)
+              LD    C,A
+              AND   CPUMODE_IS_SOFT_MASK
+              CP    CPUMODE_IS_SOFT_AVAIL
+              JP    NZ,SOFTCPUERR
+              LD    A,C
+              AND   CPUMODE_IS_T80
+              JP    Z,NOT80ERR 
+             ;LD    L,VMMODE_VGA_640x480                                  ; Enable VGA mode for a better display.
+             ;CALL  SETVGAMODE1
+              LD    A, TZSVC_CMD_CPU_SETT80                               ; We need to ask the K64F to switch to the T80 as it may involve loading of ROMS.
+              CALL  SVC_CMD
+              OR    A
+              JP    NZ,SETT80ERR
+              RET
+            ENDIF  ; BUILD_FUSIONX
+
+            ; Method to configure the hardware to use the original Z80 CPU installed on the tranZPUter board.
+            ;
+SETZ80:     IF BUILD_FUSIONX = 0
+              IN    A,(CPUINFO)
+              AND   CPUMODE_IS_SOFT_MASK
+              CP    CPUMODE_IS_SOFT_AVAIL
+              JP    NZ,SOFTCPUERR
+              CALL  SETVMODE1                                            ; Turn off VGA mode, return to default MZ video.
+              LD    A, TZSVC_CMD_CPU_SETZ80
+              CALL  SVC_CMD
+              OR    A
+              JP    NZ,SETZ80ERR
+              RET
+            ENDIF  ; BUILD_FUSIONX
+
+            ; Method to configure the hardware to use the ZPU Evolution CPU instantiated in the FPGA.
+            ;
+SETZPUEVO:  IF BUILD_FUSIONX = 0
+              IN    A,(CPUINFO)
+              LD    C,A
+              AND   CPUMODE_IS_SOFT_MASK
+              CP    CPUMODE_IS_SOFT_AVAIL
+              JP    NZ,SOFTCPUERR
+              LD    A,C
+              AND   CPUMODE_IS_ZPU_EVO
+              JP    Z,NOZPUERR 
+              LD    L,VMMODE_VGA_640x480                                  ; Enable VGA mode for a better display.
+              CALL  SETVGAMODE1
+              LD    A, TZSVC_CMD_CPU_SETZPUEVO                            ; We need to ask the K64F to switch to the ZPU Evo as it may involve loading of ROMS.
+              CALL  SVC_CMD
+              OR    A
+              JP    NZ,SETZPUERR
+              HALT                                                          ; ZPU will take over so stop the Z80 from further processing.
+            ENDIF  ; BUILD_FUSIONX
+
+            ;----------------------------------------------
+            ; Hardware Emulation Mode Activation Routines.
+            ;----------------------------------------------
+
+SETMZ80K:   IF BUILD_FUSIONX = 0
+              LD    D, TZSVC_CMD_EMU_SETMZ80K                             ; We need to ask the K64F to switch to the Sharp MZ80K emulation as it involves loading ROMS.
+              JR    SETEMUMZ
+            ENDIF  ; BUILD_FUSIONX
+SETMZ80C:   IF BUILD_FUSIONX = 0
+              LD    D, TZSVC_CMD_EMU_SETMZ80C
+              JR    SETEMUMZ
+            ENDIF  ; BUILD_FUSIONX
+SETMZ1200:  IF BUILD_FUSIONX = 0
+              LD    D, TZSVC_CMD_EMU_SETMZ1200
+              JR    SETEMUMZ
+            ENDIF  ; BUILD_FUSIONX
+SETMZ80A:   IF BUILD_FUSIONX = 0
+              LD    D, TZSVC_CMD_EMU_SETMZ80A
+              JR    SETEMUMZ
+            ENDIF  ; BUILD_FUSIONX
+SETMZ700:   IF BUILD_FUSIONX = 0
+              LD    D, TZSVC_CMD_EMU_SETMZ700
+              JR    SETEMUMZ
+            ENDIF  ; BUILD_FUSIONX
+SETMZ1500:  IF BUILD_FUSIONX = 0
+              LD    D, TZSVC_CMD_EMU_SETMZ1500
+              JR    SETEMUMZ
+            ENDIF  ; BUILD_FUSIONX
+SETMZ800:   IF BUILD_FUSIONX = 0
+              LD    D, TZSVC_CMD_EMU_SETMZ800
+              JR    SETEMUMZ
+            ENDIF  ; BUILD_FUSIONX
+SETMZ80B:   IF BUILD_FUSIONX = 0
+              LD    D, TZSVC_CMD_EMU_SETMZ80B
+              JR    SETEMUMZ
+            ENDIF  ; BUILD_FUSIONX
+SETMZ2000:  IF BUILD_FUSIONX = 0
+              LD    D, TZSVC_CMD_EMU_SETMZ2000
+              JR    SETEMUMZ
+            ENDIF  ; BUILD_FUSIONX
+SETMZ2200:  IF BUILD_FUSIONX = 0
+              LD    D, TZSVC_CMD_EMU_SETMZ2200
+              JR    SETEMUMZ
+            ENDIF  ; BUILD_FUSIONX
+SETMZ2500:  IF BUILD_FUSIONX = 0
+              LD    D, TZSVC_CMD_EMU_SETMZ2500
+              JR    SETEMUMZ
+            ENDIF  ; BUILD_FUSIONX
+            ;
+            ; General function to determine if the emulator MZ hardware is present and activate it. Activation requires making a request to the
+            ; I/O processor as it needs to load up the correct BIOS etc prior to activating the emulation.
+            ;
+SETEMUMZ:   IF BUILD_FUSIONX = 0
+              IN    A,(CPUINFO)                                           ; Verify that the FPGA has emuMZ capabilities.
+              LD    C,A
+              AND   CPUMODE_IS_SOFT_MASK
+              CP    CPUMODE_IS_SOFT_AVAIL
+              JR    NZ,SOFTCPUERR
+              LD    A,C
+              AND   CPUMODE_IS_EMU_MZ
+              JR    Z,NOEMUERR 
+              LD    L,VMMODE_VGA_640x480                                  ; Enable VGA mode for a better display.
+              CALL  SETVGAMODE1
+              ;
+              PUSH  DE                                                    ; Setup the initial video mode based on the required emulation.
+              LD    A,D
+              SUB   TZSVC_CMD_EMU_SETMZ80K
+              LD    L,A
+              LD    H,0
+              CALL  SETVMODE0
+              POP   DE
+              ;
+              LD    A, D                                                  ; Load up the required emulation mode.
+              CALL  SVC_CMD
+              OR    A
+              JR    NZ,SETT80ERR
+              HALT
+            ENDIF   ; BUILD_FUSIONX
+
+            ; Simple routine to clear screen or attributes.
+CLR8:       LD      BC,00800H
+            PUSH    DE
+            LD      D,A
+CLR8_1:     LD      (HL),D
+            INC     HL
+            DEC     BC
+            LD      A,B
+            OR      C
+            JR      NZ,CLR8_1
+            POP     DE
+            RET  
+            ;
+            ; Message addresses are in Bank2.
+            ;
+NOFPGAERR:  IF BUILD_FUSIONX = 0
+              LD    DE,MSGNOFPGA
+              JR    BADNUM2
+            ENDIF   ; BUILD_FUSIONX
+SETT80ERR:  IF BUILD_FUSIONX = 0
+              LD    DE,MSGT80ERR
+              JR    BADNUM2
+            ENDIF   ; BUILD_FUSIONX
+SETZ80ERR:  IF BUILD_FUSIONX = 0
+              LD    DE,MSGZ80ERR
+              JR    BADNUM2
+            ENDIF   ; BUILD_FUSIONX
+SETZPUERR:  IF BUILD_FUSIONX = 0
+              LD    DE,MSGZPUERR
+              JR    BADNUM2
+            ENDIF   ; BUILD_FUSIONX
+SOFTCPUERR: IF BUILD_FUSIONX = 0
+              LD    DE,MSGNOSOFTCPU
+              JR    BADNUM2
+            ENDIF   ; BUILD_FUSIONX
+NOT80ERR:   IF BUILD_FUSIONX = 0
+              LD    DE,MSGNOT80CPU
+              JR    BADNUM2
+            ENDIF   ; BUILD_FUSIONX
+NOZPUERR:   IF BUILD_FUSIONX = 0
+              LD    DE,MSGNOZPUCPU
+              JR    BADNUM2
+            ENDIF   ; BUILD_FUSIONX
+NOEMUERR:   IF BUILD_FUSIONX = 0
+              LD    DE,MSGNOEMU
+              JR    BADNUM2
+            ENDIF   ; BUILD_FUSIONX
+SETFREQERR: LD      DE,MSGFREQERR
+            JR      BADNUM2
+BADNUMERR:  LD      DE,MSGBADNUM
+BADNUM2:    CALL    ?PRINTMSG
+            RET
+
 
             ;-------------------------------------------------------------------------------
             ; END OF ADDITIONAL TZFS COMMAND METHODS

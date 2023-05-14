@@ -32,6 +32,7 @@
 ;-                  Feb 2023 v1.7  - TZFS now running on FusionX. Changes to ensure compatibility and
 ;-                                   addition of new commands, assemble, disassemble, fill, write I/O,
 ;-                                   read I/O.
+;-                  May 2023 v1.8  - Added tape delay compensation command.
 ;-
 ;--------------------------------------------------------------------------------------------------------
 ;- This source file is free software: you can redistribute it and-or modify
@@ -132,9 +133,10 @@ SET_FREQ:   JP       ?SETFREQ                                            ; UROMA
 ?PRTSTR:    CALLBNK PRTSTR,      TZMM_TZFS2
 ?HELP:      CALLBNK HELP,        TZMM_TZFS2
 ?MCORX:     CALLBNK MCORX,       TZMM_TZFS3
-?COPYM:     CALLBNK COPYM,       TZMM_TZFS4
-?WRITEIO:   CALLBNK WRITEIO,     TZMM_TZFS4
-?READIO:    CALLBNK READIO,      TZMM_TZFS4
+?TAPECOMP:  CALLBNK TAPECOMP,    TZMM_TZFS3
+?COPYM:     CALLBNK COPYM,       TZMM_TZFS3
+?WRITEIO:   CALLBNK WRITEIO,     TZMM_TZFS3
+?READIO:    CALLBNK READIO,      TZMM_TZFS3
 ?DUMPBC:    CALLBNK DUMPBC,      TZMM_TZFS3
 ?DUMPX:     CALLBNK DUMPX,       TZMM_TZFS3
 ?DUMP:      CALLBNK DUMP,        TZMM_TZFS3
@@ -144,15 +146,15 @@ SET_FREQ:   JP       ?SETFREQ                                            ; UROMA
 ?DASM:      CALLBNK DASM_MAIN,   TZMM_TZFS4
 ?ASM:       CALLBNK ASM_MAIN,    TZMM_TZFS4
             IF BUILD_FUSIONX = 0
-?SETVMODE:  CALLBNK SETVMODE,    TZMM_TZFS4
-?SETVGAMODE:CALLBNK SETVGAMODE,  TZMM_TZFS4
-?SETVBORDER:CALLBNK SETVBORDER,  TZMM_TZFS4
+?SETVMODE:    CALLBNK SETVMODE,  TZMM_TZFS3
+?SETVGAMODE:  CALLBNK SETVGAMODE,TZMM_TZFS3
+?SETVBORDER:  CALLBNK SETVBORDER,TZMM_TZFS3
             ENDIF   ; BUILD_FUSIONX
-?SETFREQ:   CALLBNK SETFREQ,     TZMM_TZFS4
+?SETFREQ:   CALLBNK SETFREQ,     TZMM_TZFS3
             IF BUILD_FUSIONX = 0
-?SETT80:    CALLBNK SETT80,      TZMM_TZFS4
-?SETZ80:    CALLBNK SETZ80,      TZMM_TZFS4
-?SETZPUEVO: CALLBNK SETZPUEVO,   TZMM_TZFS4
+?SETT80:      CALLBNK SETT80,    TZMM_TZFS3
+?SETZ80:      CALLBNK SETZ80,    TZMM_TZFS3
+?SETZPUEVO:   CALLBNK SETZPUEVO, TZMM_TZFS3
             ENDIF   ; BUILD_FUSIONX
 ?TIMERTST:  CALLBNK TIMERTST,    TZMM_TZFS3
 ?PTESTX:    CALLBNK PTESTX,      TZMM_TZFS3
@@ -164,17 +166,17 @@ CNV_ATOS:   CALLBNK CNVSTR_AS,   TZMM_TZFS2                              ;
 ?WRITZFS:   CALLBNK WRITZFS,     TZMM_TZFS3
 ?WRDTZFS:   CALLBNK WRDTZFS,     TZMM_TZFS3
             IF BUILD_FUSIONX = 0
-?SETMZ80K:  CALLBNK SETMZ80K,    TZMM_TZFS4
-?SETMZ80C:  CALLBNK SETMZ80C,    TZMM_TZFS4
-?SETMZ1200: CALLBNK SETMZ1200,   TZMM_TZFS4
-?SETMZ80A:  CALLBNK SETMZ80A,    TZMM_TZFS4
-?SETMZ700:  CALLBNK SETMZ700,    TZMM_TZFS4
-?SETMZ1500: CALLBNK SETMZ1500,   TZMM_TZFS4
-?SETMZ800:  CALLBNK SETMZ800,    TZMM_TZFS4
-?SETMZ80B:  CALLBNK SETMZ80B,    TZMM_TZFS4
-?SETMZ2000: CALLBNK SETMZ2000,   TZMM_TZFS4
-?SETMZ2200: CALLBNK SETMZ2200,   TZMM_TZFS4
-?SETMZ2500: CALLBNK SETMZ2500,   TZMM_TZFS4
+?SETMZ80K:    CALLBNK SETMZ80K,  TZMM_TZFS3
+?SETMZ80C:    CALLBNK SETMZ80C,  TZMM_TZFS3
+?SETMZ1200:   CALLBNK SETMZ1200, TZMM_TZFS3
+?SETMZ80A:    CALLBNK SETMZ80A,  TZMM_TZFS3
+?SETMZ700:    CALLBNK SETMZ700,  TZMM_TZFS3
+?SETMZ1500:   CALLBNK SETMZ1500, TZMM_TZFS3
+?SETMZ800:    CALLBNK SETMZ800,  TZMM_TZFS3
+?SETMZ80B:    CALLBNK SETMZ80B,  TZMM_TZFS3
+?SETMZ2000:   CALLBNK SETMZ2000, TZMM_TZFS3
+?SETMZ2200:   CALLBNK SETMZ2200, TZMM_TZFS3
+?SETMZ2500:   CALLBNK SETMZ2500, TZMM_TZFS3
             ENDIF   ; BUILD_FUSIONX
             ;-----------------------------------------
 
@@ -210,81 +212,8 @@ MONITOR:    LD      A, (SCRNMODE)
 MONITOR1:   LD      HL,DSPCTL                                            ; Control register address for the 40/80 Colour Card.
             LD      A, C                                                 ; Recall screen mode.
             BIT     0, A
-            JR      NZ, SET80CHAR
-            ;
-SET40CHAR:  IN      A,(CPLDINFO)                                         ; Get configuration of hardware.
-            BIT     3,A
-            JR      Z,SET40_1
-            ;
-            AND     007H                                                 ; Get the base machine mode, use as the starting mode for the video.
-            LD      D, A
-
-            LD      A, C                                                 ; Check to see if a mode override has been set.
-            BIT     2, A
-            LD      A, VMMODE_VGA_OFF
-            JR      Z, SET40_0
-            ;
-            LD      A, C                                                 ; Recall the stored mode and ready for register update.
-            RRCA
-            RRCA
-            RRCA
-            RRCA
-            AND     00FH
-            LD      D,A
-            ;
-            LD      A, (SCRNMODE2)                                       ; Get the VGA mode and set.
-SET40_0:    OUT     (VMVGAMODE), A
-            LD      A, D
-            OUT     (VMCTRL),A                                           ; Activate.
-
-            JR      SET40_2
-            ;
-SET40_1:    XOR     A                                                    ; 40 char mode.
-            LD      E,(HL)                                               ; Dummy operation to enable latch write via multivibrator.
-            LD      (HL), A
-            ;
-SET40_2:    XOR     A
-            LD      (SPAGE), A                                           ; Allow MZ80A scrolling
-            JR      SIGNON
-            ;
-SET80CHAR:  IN      A,(CPLDINFO)                                         ; Get configuration of hardware.
-            BIT     3,A
-            JR      Z,SET80_1                                            ; No FPGA hardware so try and set set 80 char mode on the assumption the 40/80 Colour Card is installed.
-            ;
-            AND     007H
-            OR      MODE_80CHAR                                          ; Set 80 char flag.
-            LD      D, A
-            ;
-            LD      A, C                                                 ; Check to see if a mode override has been set.
-            BIT     2, A
-            LD      A, VMMODE_VGA_OFF
-            JR      Z, SET80_0
-
-            LD      A, C                                                 ; Recall the stored mode and ready for register update.
-            RRCA
-            RRCA
-            RRCA
-            RRCA
-            AND     00FH
-            OR      MODE_80CHAR                                          ; Set 80 char flag.
-            LD      D,A
-            ;
-            LD      A, (SCRNMODE2)                                       ; Get the VGA mode and set.
-SET80_0:    OUT     (VMVGAMODE),A
-            LD      A, D
-            OR      MODE_80CHAR                                          ; Set 80 char flag.
-            OUT     (VMCTRL),A                                           ; Activate.
-            LD      A, C                                                 ; Indicate we are using the FPGA video hardware.
-            SET     1, A
-            LD      (SCRNMODE), A
-            JR      SET80_2
-            ;
-SET80_1:    LD      A, 128                                               ; 80 char mode.
-            LD      E,(HL)                                               ; Dummy operation to enable latch write via multivibrator.
-            LD      (HL), A
-            ;
-SET80_2:    LD      A, 0FFH
-            LD      (SPAGE), A                                           ; MZ80K Scrolling in 80 column mode for time being.
+            JP      NZ, SET80CHAR
+            JP      SET40CHAR
             ;
 SIGNON:     LD      A,0C4h                                               ; Move cursor left to overwrite part of SA-1510/monitor banner.
             LD      E,004h                                               ; 4 times.
@@ -507,7 +436,6 @@ HEXIYX2:    POP     AF                                                   ; Waste
             ;-------------------------------------------------------------------------------
 
 
-
 ;-------------------------------------------------------------------------------------------
 ; RAM STORAGE AREA
 ;-------------------------------------------------------------------------------------------
@@ -558,6 +486,85 @@ SETMEM:     LD      (HL),A
             ; Screen Width and Mode Commands
             ;
             ;====================================
+
+            ; Setup the screen as 40x25 chars.
+SET40CHAR:  IN      A,(CPLDINFO)                                         ; Get configuration of hardware.
+            BIT     3,A
+            JR      Z,SET40_1
+            ;
+            AND     007H                                                 ; Get the base machine mode, use as the starting mode for the video.
+            LD      D, A
+
+            LD      A, C                                                 ; Check to see if a mode override has been set.
+            BIT     2, A
+            LD      A, VMMODE_VGA_OFF
+            JR      Z, SET40_0
+            ;
+            LD      A, C                                                 ; Recall the stored mode and ready for register update.
+            RRCA
+            RRCA
+            RRCA
+            RRCA
+            AND     00FH
+            LD      D,A
+            ;
+            LD      A, (SCRNMODE2)                                       ; Get the VGA mode and set.
+SET40_0:    OUT     (VMVGAMODE), A
+            LD      A, D
+            OUT     (VMCTRL),A                                           ; Activate.
+
+            JR      SET40_2
+            ;
+SET40_1:    XOR     A                                                    ; 40 char mode.
+            LD      E,(HL)                                               ; Dummy operation to enable latch write via multivibrator.
+            LD      (HL), A
+            ;
+SET40_2:    XOR     A
+            LD      (SPAGE), A                                           ; Allow MZ80A scrolling
+            JP      SIGNON
+            ;
+            ; Setup the screen as 80x25 chars.
+            ;
+SET80CHAR:  IN      A,(CPLDINFO)                                         ; Get configuration of hardware.
+            BIT     3,A
+            JR      Z,SET80_1                                            ; No FPGA hardware so try and set set 80 char mode on the assumption the 40/80 Colour Card is installed.
+            ;
+            AND     007H
+            OR      MODE_80CHAR                                          ; Set 80 char flag.
+            LD      D, A
+            ;
+            LD      A, C                                                 ; Check to see if a mode override has been set.
+            BIT     2, A
+            LD      A, VMMODE_VGA_OFF
+            JR      Z, SET80_0
+
+            LD      A, C                                                 ; Recall the stored mode and ready for register update.
+            RRCA
+            RRCA
+            RRCA
+            RRCA
+            AND     00FH
+            OR      MODE_80CHAR                                          ; Set 80 char flag.
+            LD      D,A
+            ;
+            LD      A, (SCRNMODE2)                                       ; Get the VGA mode and set.
+SET80_0:    OUT     (VMVGAMODE),A
+            LD      A, D
+            OR      MODE_80CHAR                                          ; Set 80 char flag.
+            OUT     (VMCTRL),A                                           ; Activate.
+            LD      A, C                                                 ; Indicate we are using the FPGA video hardware.
+            SET     1, A
+            LD      (SCRNMODE), A
+            JR      SET80_2
+            ;
+SET80_1:    LD      A, 128                                               ; 80 char mode.
+            LD      E,(HL)                                               ; Dummy operation to enable latch write via multivibrator.
+            LD      (HL), A
+            ;
+SET80_2:    LD      A, 0FFH
+            LD      (SPAGE), A                                           ; MZ80K Scrolling in 80 column mode for time being.
+            JP      SIGNON
+            ;
 
             ; Commands to start the machine in its original mode loading either a 40 or 80 column BIOS as directed.
 SETMODE40:  IN      A,(CPLDINFO)                                         ; Get configuration of hardware.
@@ -2548,6 +2555,9 @@ CMDTABLE:  ;DB      000H | 000H | 000H | 003H
               DB    "T80"                                                ; Switch to soft T80 CPU.
               DW    ?SETT80
             ENDIF
+            DB      000H | 000H | 000H | 002H
+            DB      "TC"                                                 ; Tape timing compensation.
+            DW      ?TAPECOMP
             DB      000H | 000H | 000H | 001H
             DB      'T'                                                  ; Timer test.
             DW      ?TIMERTST
@@ -2578,14 +2588,12 @@ CMDTABLE:  ;DB      000H | 000H | 000H | 003H
               DB    000H | 000H | 000H | 001H
             ENDIF
 
-
-
             ;-------------------------------------------------------------------------------
             ; END OF TZFS COMMAND FUNCTIONS.
             ;-------------------------------------------------------------------------------
 
             ;
-            ; Ensure we fill the entire 6K by padding with FF's.
+            ; Ensure we fill the entire 64K by padding with 00's.
             ;
             ALIGN_NOPS      10000H
 MEND: 

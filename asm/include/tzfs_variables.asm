@@ -74,5 +74,6 @@ CMTDLY1CNTM:            DS      virtual 1                                ; Short
 CMTDLY1CNTS:            DS      virtual 1                                ; Short pulse delay count SPACE
 CMTDLY2CNTM:            DS      virtual 1                                ; Long pulse delay count MARK
 CMTDLY2CNTS:            DS      virtual 1                                ; Long pulse delay count SPACE
+CMTDLYCOMP:             DS      virtual 1                                ; Tape delay compensation, -128..+127, to compensate for tape stretch or drive band decay.
                         DS      virtual (TZVARMEM + TZVARSIZE) - $       ; Top of variable area downwards is used as the working stack, SA1510 space isnt used.
 TZSTACK:                EQU     TZVARMEM + TZVARSIZE
