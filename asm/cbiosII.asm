@@ -1437,6 +1437,10 @@ TIMESET:    LD      (TIMESEC),HL                                         ; Load 
               LD    (HL),09CH                                            ; Place divisor in Counter 1, = 156, thus 15611/156 = 100
               LD    (HL),000H
             ENDIF
+            IF      BUILD_MZ1500 = 1
+              LD    (HL),09CH                                            ; Place divisor in Counter 1, = 156, thus 15611/156 = 100
+              LD    (HL),000H
+            ENDIF
             NOP     
             NOP     
             NOP     

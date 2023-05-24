@@ -40,6 +40,7 @@
 BUILD_VIDEOMODULE         EQU   1                                        ; Build for the Video Module v2 board (=1) otherwise build for the 80Char Colour Board v1.0
 BUILD_MZ80A               EQU   0                                        ; Build for the Sharp MZ-80A base hardware.
 BUILD_MZ700               EQU   1                                        ; Build for the Sharp MZ-700 base hardware.
+BUILD_MZ1500              EQU   0                                        ; Build for the Sharp MZ-1500 base hardware.
 BUILD_80C                 EQU   1                                        ; Build for an 80 column (Video Module or 40/80 Colour Card) equipped machine, 0 = standard 40 column.
                         ENDIF
                         ; CPM for MZ-80A with with Video Module (if not present expects 40/80 Colour Board) and 80 Columns display.
@@ -47,6 +48,7 @@ BUILD_80C                 EQU   1                                        ; Build
 BUILD_VIDEOMODULE         EQU   1                                        ; Build for the Video Module v2 board (=1) otherwise build for the 80Char Colour Board v1.0
 BUILD_MZ80A               EQU   1                                        ; Build for the Sharp MZ-80A base hardware.
 BUILD_MZ700               EQU   0                                        ; Build for the Sharp MZ-700 base hardware.
+BUILD_MZ1500              EQU   0                                        ; Build for the Sharp MZ-1500 base hardware.
 BUILD_80C                 EQU   1                                        ; Build for an 80 column (Video Module or 40/80 Colour Card) equipped machine, 0 = standard 40 column.
                         ENDIF
                         ; CPM for MZ-80A with with standard 40 column display.
@@ -54,6 +56,7 @@ BUILD_80C                 EQU   1                                        ; Build
 BUILD_VIDEOMODULE         EQU   0                                        ; Build for the Video Module v2 board (=1) otherwise build for the 80Char Colour Board v1.0
 BUILD_MZ80A               EQU   1                                        ; Build for the Sharp MZ-80A base hardware.
 BUILD_MZ700               EQU   0                                        ; Build for the Sharp MZ-700 base hardware.
+BUILD_MZ1500              EQU   0                                        ; Build for the Sharp MZ-1500 base hardware.
 BUILD_80C                 EQU   0                                        ; Build for an 80 column (Video Module or 40/80 Colour Card) equipped machine, 0 = standard 40 column.
                         ENDIF
                         ; CPM for MZ-700 with with standard 40 column display.
@@ -61,6 +64,15 @@ BUILD_80C                 EQU   0                                        ; Build
 BUILD_VIDEOMODULE         EQU   0                                        ; Build for the Video Module v2 board (=1) otherwise build for the 80Char Colour Board v1.0
 BUILD_MZ80A               EQU   0                                        ; Build for the Sharp MZ-80A base hardware.
 BUILD_MZ700               EQU   1                                        ; Build for the Sharp MZ-700 base hardware.
+BUILD_MZ1500              EQU   0                                        ; Build for the Sharp MZ-1500 base hardware.
+BUILD_80C                 EQU   0                                        ; Build for an 80 column (Video Module or 40/80 Colour Card) equipped machine, 0 = standard 40 column.
+                        ENDIF
+                        ; CPM for MZ-1500 with with standard 40 column display.
+                        IF BUILD_VERSION = 4
+BUILD_VIDEOMODULE         EQU   0                                        ; Build for the Video Module v2 board (=1) otherwise build for the 80Char Colour Board v1.0
+BUILD_MZ80A               EQU   0                                        ; Build for the Sharp MZ-80A base hardware.
+BUILD_MZ700               EQU   0                                        ; Build for the Sharp MZ-700 base hardware.
+BUILD_MZ1500              EQU   1                                        ; Build for the Sharp MZ-1500 base hardware.
 BUILD_80C                 EQU   0                                        ; Build for an 80 column (Video Module or 40/80 Colour Card) equipped machine, 0 = standard 40 column.
                         ENDIF
 

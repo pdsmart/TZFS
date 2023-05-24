@@ -38,7 +38,7 @@ ASM=glass-0.5.jar
 BUILDROMLIST="mz2000_ipl_original mz2000_ipl_tzpu mz800_1z_013b mz800_9z_504m mz800_iocs mz80afi monitor_sa1510 monitor_80c_sa1510 monitor_1z-013a monitor_80c_1z-013a monitor_1z-013a-km monitor_80c_1z-013a-km mz80b_ipl"
 #BUILDMZFLIST="hi-ramcheck sharpmz-test"
 #BUILDMZFLIST="basic_sp-5025 5z009-1b sa-5510_tzfs msbasic_mz80a msbasic_mz700 msbasic_tz40 msbasic_tz80 sharpmz-test"
-BUILDMZFLIST="5z009-1b sa-5510_tzfs msbasic_mz80a msbasic_mz700 msbasic_tz40 msbasic_tz80 sharpmz-test"
+BUILDMZFLIST="5z009-1b sa-5510_tzfs msbasic_mz80a msbasic_mz700 msbasic_mz1500 msbasic_tz40 msbasic_tz80 sharpmz-test"
 ASMDIR=${ROOTDIR}/asm
 ASMTMPDIR=${ROOTDIR}/tmp
 INCDIR=${ROOTDIR}/asm/include
@@ -71,6 +71,9 @@ do
     elif [[ ${SRCNAME} = "msbasic_tz80" ]]; then
         ASMNAME="msbasic.asm"
         echo "BUILD_VERSION EQU 3" > ${INCDIR}/MSBASIC_BuildVersion.asm
+    elif [[ ${SRCNAME} = "msbasic_mz1500" ]]; then
+        ASMNAME="msbasic.asm"
+        echo "BUILD_VERSION EQU 4" > ${INCDIR}/MSBASIC_BuildVersion.asm
     fi
 
     # Assemble the source.

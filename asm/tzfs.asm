@@ -1322,6 +1322,9 @@ LOADBASIC:
             IF BUILD_MZ700 > 0
               LD    DE,BASICFNM700
             ENDIF
+            IF BUILD_MZ1500 > 0
+              LD    DE,BASICFNM1500
+            ENDIF
             JR      LOADSDCARD
 
             ; Quick method to load CPM. So long as the filename doesnt change this method will load and boot CPM.
@@ -1331,6 +1334,9 @@ LOADCPM:
             ENDIF
             IF BUILD_MZ700 > 0
               LD    DE,CPMFNAME700
+            ENDIF
+            IF BUILD_MZ1500 > 0
+              LD    DE,CPMFNAME1500
             ENDIF
             JR      LOADSDCARD
 
@@ -2375,7 +2381,9 @@ LOCALTEST:  LD      A,0
 CPMFNAME80A:DB      "CPM223 MZ-80A-80", 000H
 BASICFNM80A:DB      "BASIC-SA-5510-TZ", 000H
 CPMFNAME700:DB      "CPM223 MZ-700-80", 000H
+CPMFNAME1500:DB     "CPM223 MZ-1500-4", 000H
 BASICFNM700:DB      "S-BASIC", 000H
+BASICFNM1500:DB     "S-BASIC", 000H
 DEFAULTFN:  DB      "DEFAULT"
 DEFAULTFNE: EQU     $
 

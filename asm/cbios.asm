@@ -719,7 +719,7 @@ KTBLC:      ; CTRL ON
             ;
             ; Keyboard routine for the MZ-700 hardware.
             ;
-            IF      BUILD_MZ700 = 1
+            IF      BUILD_MZ700+BUILD_MZ1500 > 0
             ;
             ;    KEY BOARD SWEEP
             ;    EXIT B,D7=0  NO DATA

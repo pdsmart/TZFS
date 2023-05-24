@@ -631,7 +631,7 @@ SLPT:       DB      01H                                                  ; TEXT 
             ;          (66 + (14 * x)) / 3540000 = delay 
             ;          MZ-700 - x = ((delay * 3540000) - 66) / 14
             ;          MZ-80A - x = ((delay * 2000000) - 66) / 14
-CMTSETDLY:  IF BUILD_MZ700 > 0
+CMTSETDLY:  IF BUILD_MZ700+BUILD_MZ1500 > 0
             PUSH    BC                                                       ; Store the compensation value in B to be added into fixed delay value.
             LD      A,(CMTDLYCOMP)
             LD      B,A
