@@ -61,19 +61,19 @@ do
     # Special handling for the 4 version of MS BASIC.
     if [[ ${SRCNAME} = "msbasic_mz80a" ]]; then
         ASMNAME="msbasic.asm"
-        echo "BUILD_VERSION EQU 0" > ${INCDIR}/MSBASIC_BuildVersion.asm
+        echo "BUILD_VERSION EQU 0" > ${INCDIR}/msbasic_buildversion.asm
     elif [[ ${SRCNAME} = "msbasic_mz700" ]]; then
         ASMNAME="msbasic.asm"
-        echo "BUILD_VERSION EQU 1" > ${INCDIR}/MSBASIC_BuildVersion.asm
+        echo "BUILD_VERSION EQU 1" > ${INCDIR}/msbasic_buildversion.asm
     elif [[ ${SRCNAME} = "msbasic_tz40" ]]; then
         ASMNAME="msbasic.asm"
-        echo "BUILD_VERSION EQU 2" > ${INCDIR}/MSBASIC_BuildVersion.asm
+        echo "BUILD_VERSION EQU 2" > ${INCDIR}/msbasic_buildversion.asm
     elif [[ ${SRCNAME} = "msbasic_tz80" ]]; then
         ASMNAME="msbasic.asm"
-        echo "BUILD_VERSION EQU 3" > ${INCDIR}/MSBASIC_BuildVersion.asm
+        echo "BUILD_VERSION EQU 3" > ${INCDIR}/msbasic_buildversion.asm
     elif [[ ${SRCNAME} = "msbasic_mz1500" ]]; then
         ASMNAME="msbasic.asm"
-        echo "BUILD_VERSION EQU 4" > ${INCDIR}/MSBASIC_BuildVersion.asm
+        echo "BUILD_VERSION EQU 4" > ${INCDIR}/msbasic_buildversion.asm
     fi
 
     # Assemble the source.
